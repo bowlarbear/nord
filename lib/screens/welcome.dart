@@ -58,8 +58,9 @@ class _WelcomeState extends State<Welcome> {
 
   //execute all init logic here on welcome screen page load
   void onPageLoad() async {
+    print('Welcome Page loaded');
+    print('Checking for seed...');
     checkForSeed();
-    print('Welcome Page loaded, function executed');
   }
 
   @override

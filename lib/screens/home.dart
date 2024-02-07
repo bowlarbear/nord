@@ -19,6 +19,12 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  @override
+  void initState() {
+    super.initState();
+    onPageLoad();
+  }
+
   //instantiate the bdk_lib.dart library
   BdkLibrary bdk = BdkLibrary();
   late Wallet wallet;
@@ -134,6 +140,7 @@ class _HomeState extends State<Home> {
     if (blockchain == null) {
       await blockchainInit(true);
     }
+    print('syncing wallet...');
     await bdk.sync(blockchain!, wallet);
   }
 
@@ -197,6 +204,27 @@ class _HomeState extends State<Home> {
     }
   }
 
+  //execute all init logic here on welcome screen page load
+  //TODO need to divise some logic here that will ensure this does not re init if the user is coming back from another page mid session
+  void onPageLoad() async {
+    print('Home Page loaded');
+    //TODO if wallet not loaded {}
+    print('Reading Seed...');
+    //read the seed from the users device
+    await readSeedFile();
+    print('Loading Wallet...');
+    //create/load the wallet
+    await createOrRestoreWallet(
+      mnemonic,
+      Network.Testnet,
+      "password",
+    );
+    //TODO need to figure out how to wait for syncWallet to resolve before proceeding, this is not currently working with just nested async await calls
+    // print('Get Balance...');
+    // await syncWallet();
+    // await getBalance();
+  }
+
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -225,17 +253,6 @@ class _HomeState extends State<Home> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                      SubmitButton(
-                        text: "Create/Load Wallet",
-                        callback: () async {
-                          await readSeedFile();
-                          await createOrRestoreWallet(
-                            mnemonic,
-                            Network.Testnet,
-                            "password",
-                          );
-                        },
-                      ),
                       SubmitButton(
                         text: "Sync Wallet",
                         callback: () async {
