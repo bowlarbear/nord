@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'welcome.dart';
+import 'receive.dart';
 
 //import the bdk_lib.dart library
 import '../bdk_lib.dart';
@@ -123,16 +124,6 @@ class _HomeState extends State<Home> {
       balance = bal.total;
       displayText =
           "Total Balance: ${bal.total} sats \n Immature Balance: ${bal.immature} sats";
-    });
-  }
-
-  //gets a new address from the currently loaded wallet
-  //TODO prints are for debugging only and should be removed
-  getNewAddress() async {
-    final res = await bdk.getAddress(wallet);
-    print(res.address);
-    setState(() {
-      displayText = "Address: ${res.address} \n Index: ${res.index}";
     });
   }
 
@@ -263,11 +254,6 @@ class _HomeState extends State<Home> {
                       ),
                       SubmitButton(
                           callback: () async {
-                            await getNewAddress();
-                          },
-                          text: "Get Address"),
-                      SubmitButton(
-                          callback: () async {
                             await listConfirmedTransactions();
                           },
                           text: "List Confirmed TX History"),
@@ -276,6 +262,17 @@ class _HomeState extends State<Home> {
                             await listUnconfirmedTransactions();
                           },
                           text: "List Unconfirmed TX History"),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    Receive(wallet: this.wallet)),
+                          );
+                        },
+                        child: Text('Receive'),
+                      ),
                     ])),
 
                 /* Send Transaction */
