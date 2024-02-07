@@ -220,9 +220,9 @@ class _HomeState extends State<Home> {
       "password",
     );
     //TODO need to figure out how to wait for syncWallet to resolve before proceeding, this is not currently working with just nested async await calls
-    // print('Get Balance...');
-    // await syncWallet();
-    // await getBalance();
+    print('Getting Balance...');
+    await syncWallet();
+    await getBalance();
   }
 
   final _formKey = GlobalKey<FormState>();

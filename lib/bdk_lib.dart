@@ -63,7 +63,7 @@ class BdkLibrary {
 
   Future<void> sync(Blockchain blockchain, Wallet wallet) async {
     try {
-      Isolate.run(() async => {await wallet.sync(blockchain)});
+      await Isolate.run(() async => {await wallet.sync(blockchain)});
     } on FormatException catch (e) {
       debugPrint(e.message);
     }
