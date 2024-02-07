@@ -116,6 +116,7 @@ class _HomeState extends State<Home> {
   //returns the balance of the currently loaded wallet
   //TODO prints are for debugging only and should be removed
   getBalance() async {
+    await syncWallet();
     final bal = await bdk.getBalance(wallet);
     print(bal.total);
     setState(() {
@@ -154,6 +155,7 @@ class _HomeState extends State<Home> {
 
   //TODO prints are for debugging only and should be removed
   listConfirmedTransactions() async {
+    await syncWallet();
     final confirmed = await bdk.getConfirmedTransactions(wallet);
     setState(() {
       displayText = "You have ${confirmed.length} confirmed transactions";
@@ -185,6 +187,7 @@ class _HomeState extends State<Home> {
 
   //TODO prints are for debugging only and should be removed
   listUnconfirmedTransactions() async {
+    await syncWallet();
     final unConfirmed = await bdk.getUnConfirmedTransactions(wallet);
     setState(() {
       displayText = "You have ${unConfirmed.length} unConfirmed transactions";
@@ -221,7 +224,6 @@ class _HomeState extends State<Home> {
     );
     //TODO need to figure out how to wait for syncWallet to resolve before proceeding, this is not currently working with just nested async await calls
     print('Getting Balance...');
-    await syncWallet();
     await getBalance();
   }
 
@@ -253,12 +255,6 @@ class _HomeState extends State<Home> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                      SubmitButton(
-                        text: "Sync Wallet",
-                        callback: () async {
-                          await syncWallet();
-                        },
-                      ),
                       SubmitButton(
                         callback: () async {
                           await getBalance();
