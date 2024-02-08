@@ -35,6 +35,7 @@ class _HomeState extends State<Home> {
   String? displayText;
   int balance = 0;
   List<LocalUtxo>? txHistory;
+  bool _isLoading = false;
 
   //initializes the remote blockchain db config
   blockchainInit(bool isElectrumBlockchain) async {
@@ -210,6 +211,8 @@ class _HomeState extends State<Home> {
   //TODO need to divise some logic here that will ensure this does not re init if the user is coming back from another page mid session
   void onPageLoad() async {
     print('Home Page loaded');
+    //start loading component
+    setState(() => _isLoading = true);
     //TODO if wallet not loaded {}
     print('Reading Seed...');
     //read the seed from the users device
@@ -228,6 +231,8 @@ class _HomeState extends State<Home> {
     await listUnconfirmedTransactions();
     print('Getting confirmed Transactions...');
     await listConfirmedTransactions();
+    //disable loading component
+    setState(() => _isLoading = false);
   }
 
   final _formKey = GlobalKey<FormState>();
@@ -243,104 +248,106 @@ class _HomeState extends State<Home> {
         onRefresh: () async {
           await handleRefresh();
         },
-        child: SingleChildScrollView(
-          physics: AlwaysScrollableScrollPhysics(),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 30),
-            child: Column(
-              children: [
-                /* Balance */
-                BalanceContainer(
-                  text: "${balance} Sats",
-                ),
-                /* Result */
-                ResponseContainer(
-                  text: displayText ?? "No Response",
-                ),
-                /* Create Wallet */
-                StyledContainer(
-                    child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    Receive(wallet: this.wallet)),
-                          );
-                        },
-                        child: Text('Receive'),
-                      ),
-                    ])),
-
-                /* Send Transaction */
-                StyledContainer(
-                    child: Form(
-                  key: _formKey,
+        child: _isLoading
+            ? Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 30),
                   child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        TextFieldContainer(
-                          child: TextFormField(
-                            controller: recipientAddress,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your address';
-                              }
-                              return null;
-                            },
-                            style: Theme.of(context).textTheme.bodyText1,
-                            decoration: const InputDecoration(
-                              hintText: "Enter Address",
+                    children: [
+                      /* Balance */
+                      BalanceContainer(
+                        text: "${balance} Sats",
+                      ),
+                      /* Result */
+                      ResponseContainer(
+                        text: displayText ?? "No Response",
+                      ),
+                      /* Create Wallet */
+                      StyledContainer(
+                          child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          Receive(wallet: this.wallet)),
+                                );
+                              },
+                              child: Text('Receive'),
                             ),
-                          ),
-                        ),
-                        TextFieldContainer(
-                          child: TextFormField(
-                            controller: amount,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter the amount';
-                              }
-                              return null;
+                          ])),
+
+                      /* Send Transaction */
+                      StyledContainer(
+                          child: Form(
+                        key: _formKey,
+                        child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              TextFieldContainer(
+                                child: TextFormField(
+                                  controller: recipientAddress,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter your address';
+                                    }
+                                    return null;
+                                  },
+                                  style: Theme.of(context).textTheme.bodyText1,
+                                  decoration: const InputDecoration(
+                                    hintText: "Enter Address",
+                                  ),
+                                ),
+                              ),
+                              TextFieldContainer(
+                                child: TextFormField(
+                                  controller: amount,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter the amount';
+                                    }
+                                    return null;
+                                  },
+                                  keyboardType: TextInputType.number,
+                                  style: Theme.of(context).textTheme.bodyText1,
+                                  decoration: const InputDecoration(
+                                    hintText: "Enter Amount",
+                                  ),
+                                ),
+                              ),
+                              SubmitButton(
+                                text: "Send Bitcoin",
+                                callback: () async {
+                                  if (_formKey.currentState!.validate()) {
+                                    await sendTx(recipientAddress.text,
+                                        int.parse(amount.text));
+                                  }
+                                },
+                              )
+                            ]),
+                      )),
+                      /* Delete Seed */
+                      StyledContainer(
+                        child: Column(children: [
+                          SubmitButton(
+                            callback: () async {
+                              await deleteSeedFile();
                             },
-                            keyboardType: TextInputType.number,
-                            style: Theme.of(context).textTheme.bodyText1,
-                            decoration: const InputDecoration(
-                              hintText: "Enter Amount",
-                            ),
+                            text: "Delete Seed",
                           ),
-                        ),
-                        SubmitButton(
-                          text: "Send Bitcoin",
-                          callback: () async {
-                            if (_formKey.currentState!.validate()) {
-                              await sendTx(recipientAddress.text,
-                                  int.parse(amount.text));
-                            }
-                          },
-                        )
-                      ]),
-                )),
-                /* Delete Seed */
-                StyledContainer(
-                  child: Column(children: [
-                    SubmitButton(
-                      callback: () async {
-                        await deleteSeedFile();
-                      },
-                      text: "Delete Seed",
-                    ),
-                  ]),
-                )
-              ],
-            ),
-          ),
-        ),
+                        ]),
+                      )
+                    ],
+                  ),
+                ),
+              ),
       ),
     );
   }
