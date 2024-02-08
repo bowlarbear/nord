@@ -2,7 +2,6 @@
 
 import 'package:bdk_flutter/bdk_flutter.dart';
 import 'package:nord/widgets/widgets.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
@@ -40,6 +39,18 @@ class _HomeState extends State<Home> {
   //initializes the remote blockchain db config
   blockchainInit(bool isElectrumBlockchain) async {
     blockchain = await bdk.initializeBlockchain(isElectrumBlockchain);
+  }
+
+  Future<void> handleRefresh() async {
+    //sync & fetch balance & tx list
+    print('Pulldown Refresh Initiatied...');
+    await syncWallet();
+    print('Getting Balance...');
+    await getBalance();
+    print('Getting unconfirmed Transactions...');
+    await listUnconfirmedTransactions();
+    print('Getting confirmed Transactions...');
+    await listConfirmedTransactions();
   }
 
   //reads a 12 word mnemonic seed phrase from the users local files
@@ -117,7 +128,6 @@ class _HomeState extends State<Home> {
   //returns the balance of the currently loaded wallet
   //TODO prints are for debugging only and should be removed
   getBalance() async {
-    await syncWallet();
     final bal = await bdk.getBalance(wallet);
     print(bal.total);
     setState(() {
@@ -146,7 +156,6 @@ class _HomeState extends State<Home> {
 
   //TODO prints are for debugging only and should be removed
   listConfirmedTransactions() async {
-    await syncWallet();
     final confirmed = await bdk.getConfirmedTransactions(wallet);
     setState(() {
       displayText = "You have ${confirmed.length} confirmed transactions";
@@ -178,7 +187,6 @@ class _HomeState extends State<Home> {
 
   //TODO prints are for debugging only and should be removed
   listUnconfirmedTransactions() async {
-    await syncWallet();
     final unConfirmed = await bdk.getUnConfirmedTransactions(wallet);
     setState(() {
       displayText = "You have ${unConfirmed.length} unConfirmed transactions";
@@ -213,9 +221,13 @@ class _HomeState extends State<Home> {
       Network.Testnet,
       "password",
     );
-    //TODO need to figure out how to wait for syncWallet to resolve before proceeding, this is not currently working with just nested async await calls
+    await syncWallet();
     print('Getting Balance...');
     await getBalance();
+    print('Getting unconfirmed Transactions...');
+    await listUnconfirmedTransactions();
+    print('Getting confirmed Transactions...');
+    await listConfirmedTransactions();
   }
 
   final _formKey = GlobalKey<FormState>();
@@ -223,11 +235,16 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        resizeToAvoidBottomInset: true,
-        backgroundColor: Colors.white,
-        /* AppBar */
-        appBar: buildAppBar(context),
-        body: SingleChildScrollView(
+      resizeToAvoidBottomInset: true,
+      backgroundColor: Colors.white,
+      /* AppBar */
+      appBar: buildAppBar(context),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await handleRefresh();
+        },
+        child: SingleChildScrollView(
+          physics: AlwaysScrollableScrollPhysics(),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 30),
             child: Column(
@@ -246,22 +263,6 @@ class _HomeState extends State<Home> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                      SubmitButton(
-                        callback: () async {
-                          await getBalance();
-                        },
-                        text: "Get Balance",
-                      ),
-                      SubmitButton(
-                          callback: () async {
-                            await listConfirmedTransactions();
-                          },
-                          text: "List Confirmed TX History"),
-                      SubmitButton(
-                          callback: () async {
-                            await listUnconfirmedTransactions();
-                          },
-                          text: "List Unconfirmed TX History"),
                       ElevatedButton(
                         onPressed: () {
                           Navigator.push(
@@ -339,6 +340,8 @@ class _HomeState extends State<Home> {
               ],
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 }
