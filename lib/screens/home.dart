@@ -33,6 +33,8 @@ class _HomeState extends State<Home> {
   TextEditingController amount = TextEditingController();
   String mnemonic = '';
   String? displayText;
+  List<TransactionDetails> transactions = [];
+  List<TransactionDetails> unconfirmedTransactions = [];
   int balance = 0;
   List<LocalUtxo>? txHistory;
   bool _isLoading = false;
@@ -48,10 +50,8 @@ class _HomeState extends State<Home> {
     await syncWallet();
     print('Getting Balance...');
     await getBalance();
-    print('Getting unconfirmed Transactions...');
-    await listUnconfirmedTransactions();
-    print('Getting confirmed Transactions...');
-    await listConfirmedTransactions();
+    print('Getting Transactions...');
+    await listTransactions();
   }
 
   //reads a 12 word mnemonic seed phrase from the users local files
@@ -159,7 +159,7 @@ class _HomeState extends State<Home> {
   listConfirmedTransactions() async {
     final confirmed = await bdk.getConfirmedTransactions(wallet);
     setState(() {
-      displayText = "You have ${confirmed.length} confirmed transactions";
+      transactions = confirmed;
     });
     if (confirmed.length == 0) {
       print("No confirmed transactions");
@@ -188,14 +188,14 @@ class _HomeState extends State<Home> {
 
   //TODO prints are for debugging only and should be removed
   listUnconfirmedTransactions() async {
-    final unConfirmed = await bdk.getUnConfirmedTransactions(wallet);
+    final unconfirmed = await bdk.getUnConfirmedTransactions(wallet);
     setState(() {
-      displayText = "You have ${unConfirmed.length} unConfirmed transactions";
+      unconfirmedTransactions = unconfirmed;
     });
-    if (unConfirmed.length == 0) {
+    if (unconfirmed.length == 0) {
       print("No unconfirmed transactions");
     } else {
-      for (var e in unConfirmed) {
+      for (var e in unconfirmed) {
         final txOut = await e.transaction!.output();
         print(" txid: ${e.txid}");
         print(" fee: ${e.fee}");
@@ -205,6 +205,13 @@ class _HomeState extends State<Home> {
         print("===========================");
       }
     }
+  }
+
+  listTransactions() async {
+    final tx = await bdk.getTransactions(wallet);
+    setState(() {
+      transactions = tx;
+    });
   }
 
   //execute all init logic here on welcome screen page load
@@ -227,10 +234,8 @@ class _HomeState extends State<Home> {
     await syncWallet();
     print('Getting Balance...');
     await getBalance();
-    print('Getting unconfirmed Transactions...');
-    await listUnconfirmedTransactions();
-    print('Getting confirmed Transactions...');
-    await listConfirmedTransactions();
+    print('Getting Transactions...');
+    await listTransactions();
     //disable loading component
     setState(() => _isLoading = false);
   }
@@ -260,10 +265,40 @@ class _HomeState extends State<Home> {
                       BalanceContainer(
                         text: "${balance} Sats",
                       ),
-                      /* Result */
-                      ResponseContainer(
-                        text: displayText ?? "No Response",
-                      ),
+                      /* Transactions */
+                      //TODO should add unconfirmed tx to the top of this list or rework how they are fetched and add them all to one
+                      //conditional to evaluate if transactions list is empty
+                      transactions.isEmpty
+                          ? Center(child: Text(
+                              // Display this string when transactions list is empty
+                              "No transaction history"))
+                          : Column(
+                              children: transactions
+                                  .map((transaction) => Card(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                  //subject the received value from the sent value for total
+                                                  'Value: ${transaction.received - transaction.sent}',
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                              // Add more entries here
+                                              Text('TXID: ${transaction.txid}'),
+                                              Text(
+                                                  //conditionally render timestamp if confirmed or string if unconfirmed
+                                                  'Timestamp: ${transaction.confirmationTime?.timestamp ?? "Pending"}'),
+                                              Text('Fee: ${transaction.fee}'),
+                                            ],
+                                          ),
+                                        ),
+                                      ))
+                                  .toList(),
+                            ),
                       /* Create Wallet */
                       StyledContainer(
                           child: Column(

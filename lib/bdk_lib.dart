@@ -101,6 +101,15 @@ class BdkLibrary {
     return confirmed;
   }
 
+  Future<List<TransactionDetails>> getTransactions(Wallet wallet) async {
+    List<TransactionDetails> tx = [];
+    final res = await wallet.listTransactions(true);
+    for (var e in res) {
+      tx.add(e);
+    }
+    return tx;
+  }
+
   Future<Balance> getBalance(Wallet wallet) async {
     final res = await wallet.getBalance();
     return res;
