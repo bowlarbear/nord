@@ -209,6 +209,22 @@ class _HomeState extends State<Home> {
 
   listTransactions() async {
     final tx = await bdk.getTransactions(wallet);
+    // sort txs in descending order
+    tx.sort((a, b) {
+      // Both confirmationTime are null, consider them equal in terms of sorting
+      if (a.confirmationTime == null && b.confirmationTime == null) return 0;
+
+      // A's confirmationTime is null, B's is not, A goes first
+      if (a.confirmationTime == null) return -1;
+
+      // B's confirmationTime is null, A's is not, B goes first
+      if (b.confirmationTime == null) return 1;
+
+      // At this point, neither confirmationTime is null, so it's safe to access timestamp
+      // Sort by timestamp in descending order for non-null confirmationTimes
+      return b.confirmationTime!.timestamp
+          .compareTo(a.confirmationTime!.timestamp);
+    });
     setState(() {
       transactions = tx;
     });
