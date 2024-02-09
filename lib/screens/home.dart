@@ -213,13 +213,10 @@ class _HomeState extends State<Home> {
     tx.sort((a, b) {
       // Both confirmationTime are null, consider them equal in terms of sorting
       if (a.confirmationTime == null && b.confirmationTime == null) return 0;
-
       // A's confirmationTime is null, B's is not, A goes first
       if (a.confirmationTime == null) return -1;
-
       // B's confirmationTime is null, A's is not, B goes first
       if (b.confirmationTime == null) return 1;
-
       // At this point, neither confirmationTime is null, so it's safe to access timestamp
       // Sort by timestamp in descending order for non-null confirmationTimes
       return b.confirmationTime!.timestamp
@@ -236,7 +233,7 @@ class _HomeState extends State<Home> {
     print('Home Page loaded');
     //start loading component
     setState(() => _isLoading = true);
-    //TODO if wallet not loaded {}
+    //TODO if wallet not loaded {}?
     print('Reading Seed...');
     //read the seed from the users device
     await readSeedFile();
@@ -247,9 +244,12 @@ class _HomeState extends State<Home> {
       Network.Testnet,
       "password",
     );
+    //sync the wallet data
     await syncWallet();
+    //fetch the current wallet balance
     print('Getting Balance...');
     await getBalance();
+    //fetch and sort the latest transaction data
     print('Getting Transactions...');
     await listTransactions();
     //disable loading component
@@ -281,8 +281,7 @@ class _HomeState extends State<Home> {
                       BalanceContainer(
                         text: "${balance} Sats",
                       ),
-                      /* Transactions */
-                      //TODO should add unconfirmed tx to the top of this list or rework how they are fetched and add them all to one
+                      /* Transactions (descending order)*/
                       //conditional to evaluate if transactions list is empty
                       transactions.isEmpty
                           ? Center(child: Text(
