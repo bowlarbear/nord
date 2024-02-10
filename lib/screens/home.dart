@@ -304,7 +304,7 @@ class _HomeState extends State<Home> {
                                             children: [
                                               Text(
                                                   //subject the received value from the sent value for total
-                                                  'Value: ${transaction.received - transaction.sent}',
+                                                  "Value: ${transaction.received - transaction.sent} sats (\$ ${(((transaction.received - transaction.sent) / 100000000) * price).toStringAsFixed(2)})",
                                                   style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold)),
