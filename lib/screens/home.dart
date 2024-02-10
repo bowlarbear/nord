@@ -7,8 +7,6 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'welcome.dart';
 import 'receive.dart';
-
-//import the bdk_lib.dart library
 import '../bdk_lib.dart';
 
 class Home extends StatefulWidget {
@@ -22,11 +20,13 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+    //initialization function
     onPageLoad();
   }
 
   //instantiate the bdk_lib.dart library
   BdkLibrary bdk = BdkLibrary();
+  //state
   late Wallet wallet;
   Blockchain? blockchain;
   TextEditingController recipientAddress = TextEditingController();
@@ -38,6 +38,7 @@ class _HomeState extends State<Home> {
   int balance = 0;
   List<LocalUtxo>? txHistory;
   bool _isLoading = false;
+  int price = 47085; //TODO exchange rate is currently hardcoded here
 
   //initializes the remote blockchain db config
   blockchainInit(bool isElectrumBlockchain) async {
@@ -48,10 +49,13 @@ class _HomeState extends State<Home> {
     //sync & fetch balance & tx list
     print('Pulldown Refresh Initiatied...');
     await syncWallet();
+    //get balance
     print('Getting Balance...');
     await getBalance();
+    //get latest transactions
     print('Getting Transactions...');
     await listTransactions();
+    //TODO refresh exchange rate
   }
 
   //reads a 12 word mnemonic seed phrase from the users local files
@@ -252,6 +256,7 @@ class _HomeState extends State<Home> {
     //fetch and sort the latest transaction data
     print('Getting Transactions...');
     await listTransactions();
+    //TODO refresh exchange rate
     //disable loading component
     setState(() => _isLoading = false);
   }
@@ -279,7 +284,8 @@ class _HomeState extends State<Home> {
                     children: [
                       /* Balance */
                       BalanceContainer(
-                        text: "${balance} Sats",
+                        text:
+                            "${balance} Sats (\$ ${((balance / 100000000) * price).toStringAsFixed(2)})",
                       ),
                       /* Transactions (descending order)*/
                       //conditional to evaluate if transactions list is empty
