@@ -6,7 +6,7 @@ import 'dart:io';
 import 'welcome.dart';
 import 'receive.dart';
 import '../bdk_lib.dart';
-import 'amount_sendpage.dart';
+import 'send_page2.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);

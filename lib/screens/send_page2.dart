@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
 import 'package:bdk_flutter/bdk_flutter.dart';
-import 'sending.dart';
+import 'send_page1.dart';
 
 class SendingScreen extends StatefulWidget {
   final Wallet wallet;
