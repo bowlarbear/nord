@@ -29,23 +29,35 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+    //initialization
     onPageLoad();
   }
 
+  //initialization function
+  //TODO determine under what (if any) conditions this will rerun mid session, handle appropiately with conditionals
   void onPageLoad() async {
     setState(() => _isLoading = true);
+    //read seed from local filesystem
     await readSeedFile();
+    //create or restore the wallet from seed
     await createOrRestoreWallet(
       mnemonic,
       Network.Testnet,
       "password",
     );
+    //seed the wallet db
     await syncWallet();
+    //fetch the latest balance data
     await getBalance();
+    //fetch the latest tx history
     await listTransactions();
+    //TODO refresh exchange rate
+    //disable the loading indicator
     setState(() => _isLoading = false);
   }
 
+  //reads a 12 word mnemonic  seed phrase from the local file system
+  //TODO prints are for debugging only and should be removed
   Future<void> readSeedFile() async {
     try {
       final directory = await getApplicationDocumentsDirectory();
@@ -55,15 +67,20 @@ class _HomeState extends State<Home> {
         final content = await seedFile.readAsString();
         setState(() {
           mnemonic = content;
+          print('Seed File read to memory');
         });
       } else {
+        //handle cases where the file for some reason does not exist (should not occur here)
         print('Seed file does not exist.');
       }
     } catch (e) {
+      //handle errors
       print('Error reading seed file: $e');
     }
   }
 
+  //Delete the existing seed file (this will probably only be used for testing)
+  //TODO prints are for debugging only and should be removed
   Future<void> deleteSeedFile() async {
     try {
       final directory = await getApplicationDocumentsDirectory();
@@ -82,11 +99,15 @@ class _HomeState extends State<Home> {
     }
   }
 
+  //note this currently does not restore an existing wallet, but always creates the wallet from scratch from the provided mnemonic
+  //TODO this may need a logic loop which checks first if the wallet state already exists before being run
   Future<void> createOrRestoreWallet(
       String mnemonic, Network network, String? password) async {
     try {
       final descriptors = await bdk.getDescriptors(mnemonic);
+      //init the blockchain connection
       await blockchainInit(true);
+      //create the wallet
       final res = await Wallet.create(
           descriptor: descriptors[0],
           changeDescriptor: descriptors[1],
@@ -106,8 +127,11 @@ class _HomeState extends State<Home> {
     }
   }
 
+  //returns the balance of the currently loaded wallet
+  //TODO prints are for debugging only and should be removed
   Future<void> getBalance() async {
     final bal = await bdk.getBalance(wallet);
+    print(bal.total);
     setState(() {
       balance = bal.total;
       displayText =
@@ -115,15 +139,20 @@ class _HomeState extends State<Home> {
     });
   }
 
+  //handles a manual refresh initiated by the user with a pull down request
+  //TODO prints are for debugging only and should be removed
   Future<void> handleRefresh() async {
+    //sync & fetch the latest balance and transaction data
     print('Pulldown Refresh Initiatied...');
     await syncWallet();
     print('Getting Balance...');
     await getBalance();
     print('Getting Transactions...');
     await listTransactions();
+    //TODO eventually have this refresh exchange rate
   }
 
+  //sync the wallet db with the currently loaded wallet
   Future<void> syncWallet() async {
     if (blockchain == null) {
       await blockchainInit(true);
@@ -132,12 +161,19 @@ class _HomeState extends State<Home> {
     await bdk.sync(blockchain!, wallet);
   }
 
+  //returns a chronologically sorted list of transaction history from the currently loaded wallet
   Future<void> listTransactions() async {
     final tx = await bdk.getTransactions(wallet);
+    //sort txs in descending order
     tx.sort((a, b) {
+      //both confirmation times are null, consider them equal in terms of sorting
+      //null here indicates that a tx is currently unconfirmed, these txs have the highest order precedence
       if (a.confirmationTime == null && b.confirmationTime == null) return 0;
+      //if A's confirmation time is null and B is not, A goes first
       if (a.confirmationTime == null) return -1;
+      //if B's confirmation time is null and A is not, B goes first
       if (b.confirmationTime == null) return 1;
+      //if neither confirmation time is null, the value is now safe to access
       return b.confirmationTime!.timestamp
           .compareTo(a.confirmationTime!.timestamp);
     });
@@ -146,13 +182,7 @@ class _HomeState extends State<Home> {
     });
   }
 
-  Future<void> sendTx(String addressStr, int amount) async {
-    await bdk.sendBitcoin(blockchain!, wallet, addressStr, amount);
-    setState(() {
-      displayText = "Successfully broadcast $amount Sats to $addressStr";
-    });
-  }
-
+  //initialize the blockchain connection with a remote electrum server (currently configured to blockstream's public testnet backend)
   Future<void> blockchainInit(bool isElectrumBlockchain) async {
     blockchain = await bdk.initializeBlockchain(isElectrumBlockchain);
   }
@@ -181,9 +211,11 @@ class _HomeState extends State<Home> {
                       ),
                       transactions.isEmpty
                           ? Center(
+                              //conditionally display this string when tx history is empty
                               child: Text("No transaction history"),
                             )
                           : Column(
+                              //display transactions in descending order
                               children: transactions
                                   .map(
                                     (transaction) => Card(
