@@ -119,7 +119,7 @@ class _ReceiveState extends State<Receive> {
               ElevatedButton(
                 onPressed: _getNewAddress,
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.blue,
+                  backgroundColor: Colors.blue,
                   padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
