@@ -5,11 +5,12 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
 class ImportSeed extends StatefulWidget {
+  const ImportSeed({super.key});
   @override
-  _ImportSeedState createState() => _ImportSeedState();
+  ImportSeedState createState() => ImportSeedState();
 }
 
-class _ImportSeedState extends State<ImportSeed> {
+class ImportSeedState extends State<ImportSeed> {
   String seed = ''; // State variable for the text input
 
   Future<void> writeSeedToFile(String content) async {
@@ -27,19 +28,19 @@ class _ImportSeedState extends State<ImportSeed> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Import a 12 word seed phrase'),
+        title: const Text('Import a 12 word seed phrase'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
+            const Text(
               'Seed',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             TextField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Enter 12 word seed here',
               ),
               onChanged: (value) {
@@ -48,7 +49,7 @@ class _ImportSeedState extends State<ImportSeed> {
                 });
               },
             ),
-            SizedBox(height: 20), // Space between text field and buttons
+            const SizedBox(height: 20), // Space between text field and buttons
             Row(
               children: <Widget>[
                 ElevatedButton(
@@ -58,16 +59,16 @@ class _ImportSeedState extends State<ImportSeed> {
                     Navigator.pushReplacement(context,
                         MaterialPageRoute(builder: (context) => Home()));
                   },
-                  child: Text('Proceed'),
+                  child: const Text('Proceed'),
                 ),
-                SizedBox(width: 10), // Space between buttons
+                const SizedBox(width: 10), // Space between buttons
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pushReplacement(context,
                         MaterialPageRoute(builder: (context) => Welcome()));
                     print('Back button pressed');
                   },
-                  child: Text('Back'),
+                  child: const Text('Back'),
                 ),
               ],
             ),

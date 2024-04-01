@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter/services.dart';
 import 'package:bdk_flutter/bdk_flutter.dart';
 import 'send_page1.dart';
 
@@ -9,19 +8,21 @@ class SendingScreen extends StatefulWidget {
   final int? balance;
   final Blockchain? blockchain;
 
-  SendingScreen({Key? key, required this.wallet, this.balance, this.blockchain}) : super(key: key);
+  const SendingScreen(
+      {Key? key, required this.wallet, this.balance, this.blockchain})
+      : super(key: key);
 
   @override
-  _SendingScreenState createState() => _SendingScreenState();
+  SendingScreenState createState() => SendingScreenState();
 }
 
-class _SendingScreenState extends State<SendingScreen> {
+class SendingScreenState extends State<SendingScreen> {
   late FocusNode _focusNode;
   late double enteredAmount;
   late double maxAmountToSpend;
   final NumberFormat satoshiFormat = NumberFormat('#,### sats');
   bool isAmountIncreased = false;
-  TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
 
   @override
   void initState() {
@@ -54,20 +55,21 @@ class _SendingScreenState extends State<SendingScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: Text('Sending Screen'),
+        title: const Text('Sending Screen'),
         backgroundColor: Colors.black, // Black app bar
-        iconTheme: IconThemeData(color: Colors.grey), // Bright gray back arrow
+        iconTheme:
+            const IconThemeData(color: Colors.grey), // Bright gray back arrow
       ),
       body: Stack(
         children: [
           Container(
             color: Colors.black,
-            padding: EdgeInsets.fromLTRB(16.0, 48.0, 16.0, 16.0),
+            padding: const EdgeInsets.fromLTRB(16.0, 48.0, 16.0, 16.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 AmountSection(
                   enteredAmount: enteredAmount,
                   onAmountChanged: handleTextFieldChange,
@@ -77,36 +79,43 @@ class _SendingScreenState extends State<SendingScreen> {
                     _focusNode.requestFocus();
                   },
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 SliderSection(
                   enteredAmount: enteredAmount,
                   maxAmountToSpend: maxAmountToSpend,
                   onSliderChanged: onSliderChanged,
                 ),
-                SizedBox(height: 24), // Add space between slider and button
+                const SizedBox(
+                    height: 24), // Add space between slider and button
                 ElevatedButton(
                   onPressed: isAmountIncreased
                       ? () {
                           // Navigate to the Sending.dart page with necessary parameters
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => Sending(wallet: widget.wallet, balance: widget.balance, amount: enteredAmount, blockchain: widget.blockchain),
+                              builder: (context) => Sending(
+                                  wallet: widget.wallet,
+                                  balance: widget.balance,
+                                  amount: enteredAmount,
+                                  blockchain: widget.blockchain),
                             ),
                           );
                         }
                       : null,
-                  child: Text(
-                    'Next',
-                    style: TextStyle(color: Colors.white, fontSize: 20), // White text, bigger font size
-                  ),
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all<Color>(
                         isAmountIncreased ? Colors.orange : Colors.grey),
                     minimumSize: MaterialStateProperty.all<Size>(
-                        Size(double.infinity, 50)),
+                        const Size(double.infinity, 50)),
+                  ),
+                  child: const Text(
+                    'Next',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20), // White text, bigger font size
                   ),
                 ),
-                SizedBox(height: 16), // Adjust the height as needed
+                const SizedBox(height: 16), // Adjust the height as needed
                 InvisibleTextField(
                   controller: _controller,
                   focusNode: _focusNode,
@@ -123,8 +132,8 @@ class _SendingScreenState extends State<SendingScreen> {
               right: 0,
               child: Container(
                 color: Colors.red,
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Center(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: const Center(
                   child: Text(
                     'You have no funds.',
                     style: TextStyle(
@@ -172,9 +181,9 @@ class _SendingScreenState extends State<SendingScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Warning"),
+          title: const Text("Warning"),
           content: Container(
-            child: Text(
+            child: const Text(
               "You have exceeded your balance.",
               style: TextStyle(
                 color: Colors.red,
@@ -183,7 +192,7 @@ class _SendingScreenState extends State<SendingScreen> {
           ),
           actions: [
             TextButton(
-              child: Text("OK"),
+              child: const Text("OK"),
               onPressed: () {
                 Navigator.pop(context);
               },
@@ -202,7 +211,8 @@ class AmountSection extends StatelessWidget {
   final NumberFormat satoshiFormat;
   final VoidCallback onTap;
 
-  AmountSection({
+  const AmountSection({
+    super.key,
     required this.enteredAmount,
     required this.onAmountChanged,
     required this.maxAmountToSpend,
@@ -219,12 +229,12 @@ class AmountSection extends StatelessWidget {
         children: [
           Center(
             child: Text(
-              '${satoshiFormat.format(enteredAmount)}',
-              style: TextStyle(fontSize: 24, color: Colors.white),
+              satoshiFormat.format(enteredAmount),
+              style: const TextStyle(fontSize: 24, color: Colors.white),
             ),
           ),
-          SizedBox(height: 8),
-          Center(
+          const SizedBox(height: 8),
+          const Center(
             child: Text(
               'Tap the amount to edit',
               style: TextStyle(
@@ -234,10 +244,10 @@ class AmountSection extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Container(
             height: 48.0,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               border: Border(
                 bottom: BorderSide(color: Colors.white, width: 1.0),
               ),
@@ -254,7 +264,8 @@ class SliderSection extends StatelessWidget {
   final double maxAmountToSpend;
   final ValueChanged<double> onSliderChanged;
 
-  SliderSection({
+  const SliderSection({
+    super.key,
     required this.enteredAmount,
     required this.maxAmountToSpend,
     required this.onSliderChanged,
@@ -275,8 +286,8 @@ class SliderSection extends StatelessWidget {
           activeColor: Colors.blue,
           inactiveColor: Colors.grey,
         ),
-        SizedBox(height: 16),
-        Text(
+        const SizedBox(height: 16),
+        const Text(
           'Slide to increase amount',
           style: TextStyle(fontSize: 16, color: Colors.grey),
         ),
@@ -291,7 +302,8 @@ class InvisibleTextField extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final ValueChanged<String>? onSubmitted;
 
-  InvisibleTextField({
+  const InvisibleTextField({
+    super.key,
     required this.controller,
     required this.focusNode,
     required this.onChanged,
@@ -305,12 +317,14 @@ class InvisibleTextField extends StatelessWidget {
       child: TextField(
         controller: controller,
         focusNode: focusNode,
-        style: TextStyle(color: Colors.transparent),
+        style: const TextStyle(color: Colors.transparent),
         cursorColor: Colors.transparent,
-        keyboardType: TextInputType.numberWithOptions(decimal: true), // Set keyboardType to TextInputType.numberWithOptions(decimal: true)
+        keyboardType: const TextInputType.numberWithOptions(
+            decimal:
+                true), // Set keyboardType to TextInputType.numberWithOptions(decimal: true)
         onChanged: onChanged,
         onSubmitted: onSubmitted,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           border: InputBorder.none,
           focusedBorder: InputBorder.none,
           enabledBorder: InputBorder.none,

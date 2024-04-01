@@ -17,14 +17,15 @@ class Sending extends StatefulWidget {
   });
 
   @override
-  _SendingState createState() => _SendingState();
+  SendingState createState() => SendingState();
 }
 
-class _SendingState extends State<Sending> {
+class SendingState extends State<Sending> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   late QRViewController controller;
-  TextEditingController _recipientAddressController = TextEditingController();
-  TextEditingController _noteController = TextEditingController();
+  final TextEditingController _recipientAddressController =
+      TextEditingController();
+  final TextEditingController _noteController = TextEditingController();
   bool _canSend = false;
   bool _isScanning = false;
   bool _isSuccessDisplayed = false;
@@ -42,7 +43,7 @@ class _SendingState extends State<Sending> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
-        title: Text(
+        title: const Text(
           'Sending Details',
           style: TextStyle(color: Colors.white),
         ),
@@ -58,27 +59,27 @@ class _SendingState extends State<Sending> {
                   _toggleQRScanner();
                 },
                 child: Container(
-                  padding: EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Color.fromARGB(255, 0, 0, 131),
+                    color: const Color.fromARGB(255, 0, 0, 131),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.3),
                         spreadRadius: 2,
                         blurRadius: 5,
-                        offset: Offset(0, 3),
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.qr_code,
                     size: 100,
                     color: Colors.white,
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextField(
                 controller: _recipientAddressController,
                 decoration: InputDecoration(
@@ -95,9 +96,9 @@ class _SendingState extends State<Sending> {
                   filled: true,
                   fillColor: Colors.grey[900],
                 ),
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextField(
                 controller: _noteController,
                 decoration: InputDecoration(
@@ -114,18 +115,11 @@ class _SendingState extends State<Sending> {
                   filled: true,
                   fillColor: Colors.grey[900],
                 ),
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _canSend ? _sendTransaction : null,
-                child: Text(
-                  'Send',
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                  ),
-                ),
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.resolveWith<Color>(
                     (states) {
@@ -136,7 +130,7 @@ class _SendingState extends State<Sending> {
                     },
                   ),
                   padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                    EdgeInsets.symmetric(
+                    const EdgeInsets.symmetric(
                       vertical: 12,
                       horizontal: 16,
                     ),
@@ -145,6 +139,13 @@ class _SendingState extends State<Sending> {
                     RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
+                  ),
+                ),
+                child: const Text(
+                  'Send',
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
                   ),
                 ),
               ),
@@ -173,7 +174,7 @@ class _SendingState extends State<Sending> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.black,
-          contentPadding: EdgeInsets.all(20),
+          contentPadding: const EdgeInsets.all(20),
           content: SizedBox(
             width: 300,
             height: 300,
@@ -187,7 +188,7 @@ class _SendingState extends State<Sending> {
               onPressed: () {
                 _toggleQRScanner();
               },
-              child: Text(
+              child: const Text(
                 'Close',
                 style: TextStyle(color: Colors.white),
               ),
@@ -201,13 +202,11 @@ class _SendingState extends State<Sending> {
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) async {
-      if (scanData != null) {
-        print('Scanned Data: ${scanData.code}');
-        _recipientAddressController.text = scanData.code ?? '';
-        _canSend = true;
-        await controller.stopCamera(); // Stop the camera
-        Navigator.of(context).pop(); // Close the QR code scanner dialog
-      }
+      print('Scanned Data: ${scanData.code}');
+      _recipientAddressController.text = scanData.code ?? '';
+      _canSend = true;
+      await controller.stopCamera(); // Stop the camera
+      Navigator.of(context).pop(); // Close the QR code scanner dialog
     });
   }
 
@@ -217,47 +216,46 @@ class _SendingState extends State<Sending> {
     });
   }
 
-void _sendTransaction() async {
-  String recipientAddress = _recipientAddressController.text;
-  String note = _noteController.text;
-  double amount = widget.amount;
+  void _sendTransaction() async {
+    String recipientAddress = _recipientAddressController.text;
+    String note = _noteController.text;
+    double amount = widget.amount;
 
-  // Convert the double amount to an integer
-  int amountInSatoshis = amount.toInt(); // Convert to int
+    // Convert the double amount to an integer
+    int amountInSatoshis = amount.toInt(); // Convert to int
 
-  try {
-    final txBuilder = TxBuilder();
-    final address = await Address.create(address: recipientAddress);
-    final script = await address.scriptPubKey();
-    final feeRate = await widget.blockchain!.estimateFee(25);
-    final txBuilderResult = await txBuilder
-        .addRecipient(script, amountInSatoshis) // Pass the integer value
-        .feeRate(feeRate.asSatPerVb())
-        .finish(widget.wallet);
-    final sbt = await widget.wallet.sign(psbt: txBuilderResult.psbt);
-    final tx = await sbt.extractTx();
+    try {
+      final txBuilder = TxBuilder();
+      final address = await Address.create(address: recipientAddress);
+      final script = await address.scriptPubKey();
+      final feeRate = await widget.blockchain!.estimateFee(25);
+      final txBuilderResult = await txBuilder
+          .addRecipient(script, amountInSatoshis) // Pass the integer value
+          .feeRate(feeRate.asSatPerVb())
+          .finish(widget.wallet);
+      final sbt = await widget.wallet.sign(psbt: txBuilderResult.psbt);
+      final tx = await sbt.extractTx();
 
-    // Broadcasting transaction
-    await widget.blockchain!.broadcast(tx);
+      // Broadcasting transaction
+      await widget.blockchain!.broadcast(tx);
 
-    // Success message to user
-    _showSuccessAnimation(context);
-    _recipientAddressController.clear();
-    _noteController.clear();
-  } catch (e, stackTrace) {
-    // Error handling
-    print('Error sending Bitcoin: $e');
-    print('Stack trace: $stackTrace');
+      // Success message to user
+      _showSuccessAnimation(context);
+      _recipientAddressController.clear();
+      _noteController.clear();
+    } catch (e, stackTrace) {
+      // Error handling
+      print('Error sending Bitcoin: $e');
+      print('Stack trace: $stackTrace');
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Failed to send Bitcoin: $e'),
-        backgroundColor: Colors.red,
-      ),
-    );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to send Bitcoin: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
-}
-
 
   void _showSuccessAnimation(BuildContext context) {
     if (_isSuccessDisplayed) return;
@@ -277,18 +275,18 @@ void _sendTransaction() async {
                   duration: Duration(seconds: 1),
                   width: 100,
                   height: 100,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Colors.black54,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.check,
                     color: Colors.green,
                     size: 60,
                   ),
                 ),
-                SizedBox(height: 20),
-                Text(
+                const SizedBox(height: 20),
+                const Text(
                   'Success!',
                   style: TextStyle(
                     color: Colors.white,
@@ -302,7 +300,7 @@ void _sendTransaction() async {
       },
     );
 
-    Future.delayed(Duration(seconds: 1), () {
+    Future.delayed(const Duration(seconds: 1), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => Home()),
@@ -311,9 +309,7 @@ void _sendTransaction() async {
   }
 
   void _stopQRScanner() {
-    if (controller != null) {
-      controller.dispose();
-    }
+    controller.dispose();
   }
 
   @override

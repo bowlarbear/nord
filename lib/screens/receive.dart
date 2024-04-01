@@ -7,13 +7,13 @@ import 'package:flutter/services.dart'; // Import for ClipboardData and Clipboar
 class Receive extends StatefulWidget {
   final Wallet wallet;
 
-  Receive({Key? key, required this.wallet}) : super(key: key);
+  const Receive({Key? key, required this.wallet}) : super(key: key);
 
   @override
-  _ReceiveState createState() => _ReceiveState();
+  ReceiveState createState() => ReceiveState();
 }
 
-class _ReceiveState extends State<Receive> {
+class ReceiveState extends State<Receive> {
   late String _address = ''; // Initialize _address
 
   final BdkLibrary _bdk = BdkLibrary();
@@ -45,7 +45,7 @@ class _ReceiveState extends State<Receive> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Receive', style: TextStyle(color: Colors.white)),
+        title: const Text('Receive', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, size: 30, color: Colors.grey[400]),
@@ -73,7 +73,7 @@ class _ReceiveState extends State<Receive> {
                       color: Colors.blue.withOpacity(0.8),
                       blurRadius: 15,
                       spreadRadius: 2,
-                      offset: Offset(0, 5),
+                      offset: const Offset(0, 5),
                     ),
                   ],
                 ),
@@ -81,56 +81,58 @@ class _ReceiveState extends State<Receive> {
                   padding: const EdgeInsets.all(20.0),
                   child: BarcodeWidget(
                     barcode: Barcode.qrCode(),
-                    data: _address ?? '',
+                    data: _address,
                     width: 200,
                     height: 200,
                   ),
                 ),
               ),
-              SizedBox(height: 20),
-              Text(
+              const SizedBox(height: 20),
+              const Text(
                 'Your Address:',
                 style: TextStyle(fontSize: 18, color: Colors.white),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Flexible(
                     child: Text(
                       _getShortenedAddress(), // Display shortened address
-                      style: TextStyle(fontSize: 16, color: Colors.white),
+                      style: const TextStyle(fontSize: 16, color: Colors.white),
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  SizedBox(width: 5),
+                  const SizedBox(width: 5),
                   IconButton(
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: _address));
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Address copied to clipboard')),
+                        const SnackBar(
+                            content: Text('Address copied to clipboard')),
                       );
                     },
-                    icon: Icon(Icons.content_copy, color: Colors.white),
+                    icon: const Icon(Icons.content_copy, color: Colors.white),
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _getNewAddress,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                child: Text(
+                child: const Text(
                   'Generate New Address',
                   style: TextStyle(fontSize: 16),
                 ),
               ),
-              SizedBox(height: 50),
+              const SizedBox(height: 50),
             ],
           ),
         ),

@@ -193,12 +193,12 @@ class _HomeState extends State<Home> {
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Home'),
+        title: const Text('Home'),
       ),
       body: RefreshIndicator(
         onRefresh: handleRefresh,
         child: _isLoading
-            ? Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
                 physics: AlwaysScrollableScrollPhysics(),
                 child: Container(
@@ -210,7 +210,7 @@ class _HomeState extends State<Home> {
                             "${balance} Sats (\$ ${((balance / 100000000) * price).toStringAsFixed(2)})",
                       ),
                       transactions.isEmpty
-                          ? Center(
+                          ? const Center(
                               //conditionally display this string when tx history is empty
                               child: Text("No transaction history"),
                             )
@@ -227,7 +227,7 @@ class _HomeState extends State<Home> {
                                           children: [
                                             Text(
                                               "Value: ${transaction.received - transaction.sent} sats (\$ ${(((transaction.received - transaction.sent) / 100000000) * price).toStringAsFixed(2)})",
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
@@ -254,11 +254,11 @@ class _HomeState extends State<Home> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        Receive(wallet: this.wallet),
+                                        Receive(wallet: wallet),
                                   ),
                                 );
                               },
-                              child: Text('Receive'),
+                              child: const Text('Receive'),
                             ),
                             ElevatedButton(
                               onPressed: () {
@@ -266,20 +266,20 @@ class _HomeState extends State<Home> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => SendingScreen(
-                                        wallet: this.wallet,
-                                        blockchain: this.blockchain,
-                                        balance: this.balance),
+                                        wallet: wallet,
+                                        blockchain: blockchain,
+                                        balance: balance),
                                   ),
                                 );
                               },
-                              child: Text('send'),
+                              child: const Text('send'),
                             ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             ElevatedButton(
                               onPressed: () async {
                                 await deleteSeedFile();
                               },
-                              child: Text("Delete Seed"),
+                              child: const Text("Delete Seed"),
                             ),
                           ],
                         ),

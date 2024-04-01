@@ -6,11 +6,13 @@ import 'dart:io';
 import 'package:bdk_flutter/bdk_flutter.dart';
 
 class Welcome extends StatefulWidget {
+  const Welcome({super.key});
+
   @override
-  _WelcomeState createState() => _WelcomeState();
+  WelcomeState createState() => WelcomeState();
 }
 
-class _WelcomeState extends State<Welcome> {
+class WelcomeState extends State<Welcome> {
   @override
   void initState() {
     super.initState();
@@ -67,17 +69,18 @@ class _WelcomeState extends State<Welcome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Welcome Screen'),
+        title: const Text('Welcome Screen'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
+            const Text(
               'Welcome to Nord!',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 30), // Add space between text and first button
+            const SizedBox(
+                height: 30), // Add space between text and first button
             ElevatedButton(
               onPressed: () {
                 print('New User button pressed');
@@ -85,28 +88,30 @@ class _WelcomeState extends State<Welcome> {
                 Navigator.pushReplacement(
                     context, MaterialPageRoute(builder: (context) => Home()));
               },
-              child: Text('New User'),
               style: ElevatedButton.styleFrom(
-                minimumSize:
-                    Size(double.infinity, 50), // Set button width and height
-                padding: EdgeInsets.symmetric(
+                minimumSize: const Size(
+                    double.infinity, 50), // Set button width and height
+                padding: const EdgeInsets.symmetric(
                     horizontal: 20, vertical: 15), // Add padding
               ),
+              child: const Text('New User'),
             ),
-            SizedBox(height: 20), // Add space between buttons
+            const SizedBox(height: 20), // Add space between buttons
             ElevatedButton(
               onPressed: () {
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (context) => ImportSeed()));
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ImportSeed()));
                 print('Import button pressed');
               },
-              child: Text('Import'),
               style: ElevatedButton.styleFrom(
-                minimumSize:
-                    Size(double.infinity, 50), // Set button width and height
-                padding: EdgeInsets.symmetric(
+                minimumSize: const Size(
+                    double.infinity, 50), // Set button width and height
+                padding: const EdgeInsets.symmetric(
                     horizontal: 20, vertical: 15), // Add padding
               ),
+              child: const Text('Import'),
             ),
           ],
         ),
