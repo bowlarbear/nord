@@ -7,6 +7,7 @@ import 'welcome.dart';
 import 'receive.dart';
 import '../bdk_lib.dart';
 import 'send_page2.dart';
+import 'dart:async';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -25,6 +26,8 @@ class _HomeState extends State<Home> {
   int balance = 0;
   bool _isLoading = false;
   int price = 47085;
+  int _tapCount = 0;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -182,6 +185,23 @@ class _HomeState extends State<Home> {
     });
   }
 
+  //handle the 5 quick taps for seed clear
+  void _handleUserTap() {
+    _tapCount++;
+    if (_tapCount == 1) {
+      // Start a timer on the first tap
+      _timer = Timer(const Duration(seconds: 2), () {
+        // Reset count after 2 seconds of inactivity
+        _tapCount = 0;
+      });
+    } else if (_tapCount == 6) {
+      // If user tapped 5 times, cancel timer and fire the function
+      _timer?.cancel();
+      deleteSeedFile();
+      _tapCount = 0; // Reset tap count after action is performed
+    }
+  }
+
   //initialize the blockchain connection with a remote electrum server (currently configured to blockstream's public testnet backend)
   Future<void> blockchainInit(bool isElectrumBlockchain) async {
     blockchain = await bdk.initializeBlockchain(isElectrumBlockchain);
@@ -189,105 +209,102 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Home'),
-      ),
-      body: RefreshIndicator(
-        onRefresh: handleRefresh,
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 30),
-                  child: Column(
-                    children: [
-                      BalanceContainer(
-                        text:
-                            "$balance Sats (\$ ${((balance / 100000000) * price).toStringAsFixed(2)})",
-                      ),
-                      transactions.isEmpty
-                          ? const Center(
-                              //conditionally display this string when tx history is empty
-                              child: Text("No transaction history"),
-                            )
-                          : Column(
-                              //display transactions in descending order
-                              children: transactions
-                                  .map(
-                                    (transaction) => Card(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              "Value: ${transaction.received - transaction.sent} sats (\$ ${(((transaction.received - transaction.sent) / 100000000) * price).toStringAsFixed(2)})",
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _handleUserTap,
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          title: const Text('Home'),
+        ),
+        body: RefreshIndicator(
+          onRefresh: handleRefresh,
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                    child: Column(
+                      children: [
+                        BalanceContainer(
+                          text:
+                              "$balance Sats (\$ ${((balance / 100000000) * price).toStringAsFixed(2)})",
+                        ),
+                        transactions.isEmpty
+                            ? const Center(
+                                //conditionally display this string when tx history is empty
+                                child: Text("No transaction history"),
+                              )
+                            : Column(
+                                //display transactions in descending order
+                                children: transactions
+                                    .map(
+                                      (transaction) => Card(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                "Value: ${transaction.received - transaction.sent} sats (\$ ${(((transaction.received - transaction.sent) / 100000000) * price).toStringAsFixed(2)})",
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                               ),
-                                            ),
-                                            Text('TXID: ${transaction.txid}'),
-                                            Text(
-                                              'Timestamp: ${transaction.confirmationTime?.timestamp ?? "Pending"}',
-                                            ),
-                                            Text('Fee: ${transaction.fee}'),
-                                          ],
+                                              Text('TXID: ${transaction.txid}'),
+                                              Text(
+                                                'Timestamp: ${transaction.confirmationTime?.timestamp ?? "Pending"}',
+                                              ),
+                                              Text('Fee: ${transaction.fee}'),
+                                            ],
+                                          ),
                                         ),
                                       ),
+                                    )
+                                    .toList(),
+                              ),
+                        StyledContainer(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          Receive(wallet: wallet),
                                     ),
-                                  )
-                                  .toList(),
-                            ),
-                      StyledContainer(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        Receive(wallet: wallet),
-                                  ),
-                                );
-                              },
-                              child: const Text('Receive'),
-                            ),
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => SendingScreen(
-                                        wallet: wallet,
-                                        blockchain: blockchain,
-                                        balance: balance),
-                                  ),
-                                );
-                              },
-                              child: const Text('send'),
-                            ),
-                            const SizedBox(height: 10),
-                            ElevatedButton(
-                              onPressed: () async {
-                                await deleteSeedFile();
-                              },
-                              child: const Text("Delete Seed"),
-                            ),
-                          ],
+                                  );
+                                },
+                                child: const Text('Receive'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => SendingScreen(
+                                          wallet: wallet,
+                                          blockchain: blockchain,
+                                          balance: balance),
+                                    ),
+                                  );
+                                },
+                                child: const Text('send'),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
+        ),
       ),
     );
   }
