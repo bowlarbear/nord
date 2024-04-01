@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Passport',
       theme: theme(),
-      home: Welcome(),
+      home: const Welcome(),
     );
   }
 }

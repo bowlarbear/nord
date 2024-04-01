@@ -57,15 +57,17 @@ class ImportSeedState extends State<ImportSeed> {
                     writeSeedToFile(seed);
                     print('Proceed button pressed');
                     Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (context) => Home()));
+                        MaterialPageRoute(builder: (context) => const Home()));
                   },
                   child: const Text('Proceed'),
                 ),
                 const SizedBox(width: 10), // Space between buttons
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (context) => Welcome()));
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const Welcome()));
                     print('Back button pressed');
                   },
                   child: const Text('Back'),

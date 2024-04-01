@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home.dart';
-import 'importSeed.dart';
+import 'import_seed.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:bdk_flutter/bdk_flutter.dart';
@@ -27,7 +27,7 @@ class WelcomeState extends State<Welcome> {
 
       if (await seedFile.exists()) {
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => Home()));
+            context, MaterialPageRoute(builder: (context) => const Home()));
         // Seed file exists, send user home
       } else {
         print('Seed file does not exist.');
@@ -85,8 +85,8 @@ class WelcomeState extends State<Welcome> {
               onPressed: () {
                 print('New User button pressed');
                 generateSeed();
-                Navigator.pushReplacement(
-                    context, MaterialPageRoute(builder: (context) => Home()));
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => const Home()));
               },
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(

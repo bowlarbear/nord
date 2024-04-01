@@ -182,12 +182,10 @@ class SendingScreenState extends State<SendingScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text("Warning"),
-          content: Container(
-            child: const Text(
-              "You have exceeded your balance.",
-              style: TextStyle(
-                color: Colors.red,
-              ),
+          content: const Text(
+            "You have exceeded your balance.",
+            style: TextStyle(
+              color: Colors.red,
             ),
           ),
           actions: [

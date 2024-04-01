@@ -90,7 +90,7 @@ class _HomeState extends State<Home> {
         await seedFile.delete();
         print('Seed file deleted successfully.');
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => Welcome()));
+            context, MaterialPageRoute(builder: (context) => const Welcome()));
       } else {
         print('Seed file does not exist.');
       }
@@ -200,14 +200,14 @@ class _HomeState extends State<Home> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
+                physics: const AlwaysScrollableScrollPhysics(),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 30),
                   child: Column(
                     children: [
                       BalanceContainer(
                         text:
-                            "${balance} Sats (\$ ${((balance / 100000000) * price).toStringAsFixed(2)})",
+                            "$balance Sats (\$ ${((balance / 100000000) * price).toStringAsFixed(2)})",
                       ),
                       transactions.isEmpty
                           ? const Center(

@@ -9,7 +9,8 @@ class Sending extends StatefulWidget {
   final double amount;
   final Blockchain? blockchain;
 
-  Sending({
+  const Sending({
+    super.key,
     required this.wallet,
     this.balance,
     required this.amount,
@@ -218,7 +219,7 @@ class SendingState extends State<Sending> {
 
   void _sendTransaction() async {
     String recipientAddress = _recipientAddressController.text;
-    String note = _noteController.text;
+    // String note = _noteController.text;
     double amount = widget.amount;
 
     // Convert the double amount to an integer
@@ -272,7 +273,7 @@ class SendingState extends State<Sending> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 AnimatedContainer(
-                  duration: Duration(seconds: 1),
+                  duration: const Duration(seconds: 1),
                   width: 100,
                   height: 100,
                   decoration: const BoxDecoration(
@@ -303,7 +304,7 @@ class SendingState extends State<Sending> {
     Future.delayed(const Duration(seconds: 1), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => Home()),
+        MaterialPageRoute(builder: (context) => const Home()),
       );
     });
   }
