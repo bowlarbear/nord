@@ -3,6 +3,7 @@ import 'home.dart';
 import 'welcome.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'package:nord/bip39_wordlist.dart';
 
 class ImportSeed extends StatefulWidget {
   const ImportSeed({super.key});
@@ -12,6 +13,10 @@ class ImportSeed extends StatefulWidget {
 
 class ImportSeedState extends State<ImportSeed> {
   String seed = ''; // State variable for the text input
+  final List<TextEditingController> _controllers =
+      List.generate(12, (index) => TextEditingController());
+  final List<bool> _isValid = List.generate(12, (index) => false);
+  bool _isButtonEnabled = false;
 
   Future<void> writeSeedToFile(String content) async {
     try {
@@ -24,101 +29,65 @@ class ImportSeedState extends State<ImportSeed> {
     }
   }
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text('Import a 12 word seed phrase'),
-//       ),
-//       body: Padding(
-//         padding: const EdgeInsets.all(16.0),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: <Widget>[
-//             Text(
-//               'Seed',
-//               style: Theme.of(context).textTheme.displayMedium,
-//             ),
-//             TextField(
-//               decoration: const InputDecoration(
-//                 hintText: 'Enter 12 word seed here',
-//               ),
-//               onChanged: (value) {
-//                 setState(() {
-//                   seed = value;
-//                 });
-//               },
-//             ),
-//             const SizedBox(height: 20), // Space between text field and buttons
-//             Row(
-//               children: <Widget>[
-//                 ElevatedButton(
-//                   style: ElevatedButton.styleFrom(
-//                     backgroundColor: Theme.of(context).primaryColor,
-//                   ),
-//                   onPressed: () {
-//                     writeSeedToFile(seed);
-//                     print('Proceed button pressed');
-//                     Navigator.pushReplacement(context,
-//                         MaterialPageRoute(builder: (context) => const Home()));
-//                   },
-//                   child: const Text(
-//                     'Proceed',
-//                     style: TextStyle(fontSize: 16, color: Colors.white),
-//                   ),
-//                 ),
-//                 const SizedBox(width: 10), // Space between buttons
-//                 ElevatedButton(
-//                   style: ElevatedButton.styleFrom(
-//                     backgroundColor: Colors.white,
-//                   ),
-//                   onPressed: () {
-//                     Navigator.pushReplacement(
-//                         context,
-//                         MaterialPageRoute(
-//                             builder: (context) => const Welcome()));
-//                     print('Back button pressed');
-//                   },
-//                   child: const Text(
-//                     'Back',
-//                     style: TextStyle(fontSize: 16, color: Colors.black),
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
+  void validateWord(int index) {
+    final inputWord = _controllers[index].text.toLowerCase().trim();
+    // Check if the input word is in the BIP39 word list
+    if (bip39WordList.contains(inputWord)) {
+      setState(() {
+        _isValid[index] = true; // Word is valid
+      });
+    } else {
+      setState(() {
+        _isValid[index] = false; // Word is invalid
+      });
+    }
+    _checkButton();
+  }
+
+  void _checkButton() {
+    bool allValid = _isValid.every((isValid) => isValid);
+
+    setState(() {
+      _isButtonEnabled = allValid;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Import a 12 word seed phrase'),
-      ),
+      appBar: AppBar(title: const Text('Import a 12 Word Seed Phrase')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              'Seed',
-              style: Theme.of(context).textTheme.displayMedium,
-            ),
-            TextField(
-              decoration: const InputDecoration(
-                hintText: 'Enter 12 word seed here',
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: 6,
+                itemBuilder: (_, rowIndex) {
+                  // Calculate the indexes for the two words in the current row
+                  int index1 = rowIndex * 2;
+                  int index2 = index1 + 1;
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: wordInputField(index1),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: wordInputField(index2),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
-              onChanged: (value) {
-                setState(() {
-                  seed = value;
-                });
-              },
             ),
-            const Spacer(),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -143,12 +112,21 @@ class ImportSeedState extends State<ImportSeed> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).primaryColor,
                   ),
-                  onPressed: () {
-                    writeSeedToFile(seed);
-                    print('Proceed button pressed');
-                    Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (context) => const Home()));
-                  },
+                  onPressed: _isButtonEnabled
+                      ? () {
+                          // Concatenate words to form the seed phrase
+                          final seedPhrase =
+                              _controllers.map((c) => c.text).join(' ').trim();
+                          print("Seed Phrase: $seedPhrase");
+                          // Proceed with the seed phrase
+                          writeSeedToFile(seedPhrase);
+                          print('Proceed button pressed');
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const Home()));
+                        }
+                      : null,
                   child: const Text(
                     'Proceed',
                     style: TextStyle(fontSize: 16, color: Colors.white),
@@ -159,6 +137,27 @@ class ImportSeedState extends State<ImportSeed> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget wordInputField(int index) {
+    return Row(
+      children: [
+        Text('${index + 1}.', style: const TextStyle(fontSize: 16)),
+        const SizedBox(width: 10),
+        Expanded(
+          child: TextField(
+            controller: _controllers[index],
+            decoration: InputDecoration(
+              hintText: 'Word ${index + 1}',
+              suffixIcon: _isValid[index]
+                  ? const Icon(Icons.check, color: Colors.green)
+                  : null,
+            ),
+            onChanged: (_) => validateWord(index),
+          ),
+        ),
+      ],
     );
   }
 }
