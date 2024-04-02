@@ -9,6 +9,11 @@ ThemeData theme() {
       secondaryHeaderColor: secondaryColor,
       scaffoldBackgroundColor: globalBackgroundColor,
       appBarTheme: const AppBarTheme(
+        titleTextStyle: TextStyle(
+          color: Colors.white, // Desired text color
+          fontSize: 20.0, // Optional: Adjust the font size
+          fontWeight: FontWeight.bold, // Optional: Adjust the font weight
+        ),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.black,

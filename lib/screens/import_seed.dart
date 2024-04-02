@@ -24,6 +24,75 @@ class ImportSeedState extends State<ImportSeed> {
     }
   }
 
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text('Import a 12 word seed phrase'),
+//       ),
+//       body: Padding(
+//         padding: const EdgeInsets.all(16.0),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: <Widget>[
+//             Text(
+//               'Seed',
+//               style: Theme.of(context).textTheme.displayMedium,
+//             ),
+//             TextField(
+//               decoration: const InputDecoration(
+//                 hintText: 'Enter 12 word seed here',
+//               ),
+//               onChanged: (value) {
+//                 setState(() {
+//                   seed = value;
+//                 });
+//               },
+//             ),
+//             const SizedBox(height: 20), // Space between text field and buttons
+//             Row(
+//               children: <Widget>[
+//                 ElevatedButton(
+//                   style: ElevatedButton.styleFrom(
+//                     backgroundColor: Theme.of(context).primaryColor,
+//                   ),
+//                   onPressed: () {
+//                     writeSeedToFile(seed);
+//                     print('Proceed button pressed');
+//                     Navigator.pushReplacement(context,
+//                         MaterialPageRoute(builder: (context) => const Home()));
+//                   },
+//                   child: const Text(
+//                     'Proceed',
+//                     style: TextStyle(fontSize: 16, color: Colors.white),
+//                   ),
+//                 ),
+//                 const SizedBox(width: 10), // Space between buttons
+//                 ElevatedButton(
+//                   style: ElevatedButton.styleFrom(
+//                     backgroundColor: Colors.white,
+//                   ),
+//                   onPressed: () {
+//                     Navigator.pushReplacement(
+//                         context,
+//                         MaterialPageRoute(
+//                             builder: (context) => const Welcome()));
+//                     print('Back button pressed');
+//                   },
+//                   child: const Text(
+//                     'Back',
+//                     style: TextStyle(fontSize: 16, color: Colors.black),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,9 +118,27 @@ class ImportSeedState extends State<ImportSeed> {
                 });
               },
             ),
-            const SizedBox(height: 20), // Space between text field and buttons
+            const Spacer(),
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                  ),
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const Welcome()));
+                    print('Back button pressed');
+                  },
+                  child: const Text(
+                    'Back',
+                    style: TextStyle(fontSize: 16, color: Colors.black),
+                  ),
+                ),
+                const SizedBox(width: 20),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).primaryColor,
@@ -64,23 +151,6 @@ class ImportSeedState extends State<ImportSeed> {
                   },
                   child: const Text(
                     'Proceed',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                ),
-                const SizedBox(width: 10), // Space between buttons
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
-                  ),
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const Welcome()));
-                    print('Back button pressed');
-                  },
-                  child: const Text(
-                    'Back',
                     style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ),
