@@ -1,12 +1,25 @@
-import 'package:bdk_flutter/bdk_flutter.dart';
-import 'package:nord/widgets/widgets.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-import 'welcome.dart';
-import 'receive.dart';
+import 'package:bdk_flutter/bdk_flutter.dart';
 import '../bdk_lib.dart';
+import 'receive.dart';
 import 'send_page2.dart';
+import 'settings.dart';
+import 'vault.dart';
+import 'loan.dart';
+import 'package:page_view_indicators/page_view_indicators.dart';
+
+class ExpandableTransaction {
+  final TransactionDetails transaction;
+  bool isExpanded;
+
+  ExpandableTransaction({
+    required this.transaction,
+    this.isExpanded = false,
+  });
+}
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -15,21 +28,42 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
-  BdkLibrary bdk = BdkLibrary();
+class _HomeState extends State<Home> with TickerProviderStateMixin {
+  late BdkLibrary bdk;
   late Wallet wallet;
   Blockchain? blockchain;
   String mnemonic = '';
   String? displayText;
-  List<TransactionDetails> transactions = [];
+  List<ExpandableTransaction> transactions = [];
   int balance = 0;
   bool _isLoading = false;
   int price = 47085;
+  late AnimationController _controller;
+  int _currentIndex = 0;
+  late PageController _pageController;
+  bool _expanded = false;
+  int _currentPage = 0;
+  final _pageViewNotifier = ValueNotifier<int>(0);
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 500),
+    );
+    bdk = BdkLibrary();
+    _pageController = PageController(initialPage: _currentIndex);
     onPageLoad();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _pageController.dispose();
+    _timer?.cancel();
+    super.dispose();
   }
 
   void onPageLoad() async {
@@ -61,24 +95,6 @@ class _HomeState extends State<Home> {
       }
     } catch (e) {
       print('Error reading seed file: $e');
-    }
-  }
-
-  Future<void> deleteSeedFile() async {
-    try {
-      final directory = await getApplicationDocumentsDirectory();
-      final seedFile = File('${directory.path}/seed');
-
-      if (await seedFile.exists()) {
-        await seedFile.delete();
-        print('Seed file deleted successfully.');
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => Welcome()));
-      } else {
-        print('Seed file does not exist.');
-      }
-    } catch (e) {
-      print('Error deleting seed file: $e');
     }
   }
 
@@ -115,20 +131,11 @@ class _HomeState extends State<Home> {
     });
   }
 
-  Future<void> handleRefresh() async {
-    print('Pulldown Refresh Initiatied...');
-    await syncWallet();
-    print('Getting Balance...');
-    await getBalance();
-    print('Getting Transactions...');
-    await listTransactions();
-  }
-
   Future<void> syncWallet() async {
     if (blockchain == null) {
       await blockchainInit(true);
     }
-    print('syncing wallet...');
+    print('Syncing wallet...');
     await bdk.sync(blockchain!, wallet);
   }
 
@@ -141,122 +148,313 @@ class _HomeState extends State<Home> {
       return b.confirmationTime!.timestamp
           .compareTo(a.confirmationTime!.timestamp);
     });
-    setState(() {
-      transactions = tx;
-    });
-  }
 
-  Future<void> sendTx(String addressStr, int amount) async {
-    await bdk.sendBitcoin(blockchain!, wallet, addressStr, amount);
     setState(() {
-      displayText = "Successfully broadcast $amount Sats to $addressStr";
+      transactions = tx.map((transaction) {
+        return ExpandableTransaction(transaction: transaction);
+      }).toList();
     });
-  }
-
-  Future<void> blockchainInit(bool isElectrumBlockchain) async {
-    blockchain = await bdk.initializeBlockchain(isElectrumBlockchain);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text('Home'),
+        backgroundColor: Colors.black,
+        title: Text(_currentIndex == 0
+            ? 'Bitcoin Wallet'
+            : _currentIndex == 1
+                ? 'Loan'
+                : 'Vault'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Settings(
+                      wallet: this.wallet,
+                      blockchain: this.blockchain,
+                      balance: this.balance),
+                ),
+              );
+            },
+          )
+        ],
       ),
-      body: RefreshIndicator(
-        onRefresh: handleRefresh,
-        child: _isLoading
-            ? Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 30),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : CustomScrollView(
+              slivers: [
+                SliverFillRemaining(
+                  hasScrollBody: true,
+                  fillOverscroll: true,
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      BalanceContainer(
-                        text:
-                            "${balance} Sats (\$ ${((balance / 100000000) * price).toStringAsFixed(2)})",
-                      ),
-                      transactions.isEmpty
-                          ? Center(
-                              child: Text("No transaction history"),
-                            )
-                          : Column(
-                              children: transactions
-                                  .map(
-                                    (transaction) => Card(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              "Value: ${transaction.received - transaction.sent} sats (\$ ${(((transaction.received - transaction.sent) / 100000000) * price).toStringAsFixed(2)})",
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: PageView(
+                          controller: _pageController,
+                          onPageChanged: (index) {
+                            setState(() {
+                              _currentIndex = index;
+                              _currentPage = index;
+                              _showPageIndicators(); // Show indicators when sliding
+                            });
+                            _pageViewNotifier.value = index;
+                          },
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  AnimatedBuilder(
+                                    animation: _controller,
+                                    builder: (context, child) {
+                                      return Text(
+                                        "${((balance / 100000000) * price).toStringAsFixed(2)}\$",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 48,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  Text(
+                                    "${balance} Sats",
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 24,
+                                    ),
+                                  ),
+                                  Container(
+                                    margin: EdgeInsets.symmetric(vertical: 10),
+                                    height: 1,
+                                    color: Colors.white,
+                                  ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => Receive(
+                                                    wallet: this.wallet),
                                               ),
+                                            );
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors
+                                                .orange, // Set the background color here
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                             ),
-                                            Text('TXID: ${transaction.txid}'),
-                                            Text(
-                                              'Timestamp: ${transaction.confirmationTime?.timestamp ?? "Pending"}',
+                                            padding: EdgeInsets.symmetric(
+                                              vertical: 16,
                                             ),
-                                            Text('Fee: ${transaction.fee}'),
-                                          ],
+                                          ),
+                                          child: Text(
+                                            'Receive',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              color: Colors.white,
+                                            ),
+                                          ),
                                         ),
                                       ),
+                                      SizedBox(width: 10),
+                                      Expanded(
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    SendingScreen(
+                                                        wallet: this.wallet,
+                                                        blockchain:
+                                                            this.blockchain,
+                                                        balance: this.balance),
+                                              ),
+                                            );
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.orange,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            padding: EdgeInsets.symmetric(
+                                              vertical: 16,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Send',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Divider(
+                                    color: Colors.white,
+                                    thickness: 1,
+                                  ),
+                                  Expanded(
+                                    child: ListView.builder(
+                                      itemCount: transactions.length,
+                                      itemBuilder: (context, index) {
+                                        return _buildTransactionCard(
+                                            transactions[index], price);
+                                      },
                                     ),
-                                  )
-                                  .toList(),
-                            ),
-                      StyledContainer(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        Receive(wallet: this.wallet),
                                   ),
-                                );
-                              },
-                              child: Text('Receive'),
+                                ],
+                              ),
                             ),
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => SendingScreen(
-                                        wallet: this.wallet,
-                                        blockchain: this.blockchain,
-                                        balance: this.balance),
-                                  ),
-                                );
-                              },
-                              child: Text('send'),
-                            ),
-                            SizedBox(height: 10),
-                            ElevatedButton(
-                              onPressed: () async {
-                                await deleteSeedFile();
-                              },
-                              child: Text("Delete Seed"),
-                            ),
+                            LoanPage(),
+                            VaultPage(),
                           ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 20.0),
+                        child: AnimatedOpacity(
+                          opacity: _expanded ? 1.0 : 0.0,
+                          duration: Duration(milliseconds: 500),
+                          child: CirclePageIndicator(
+                            itemCount: 3,
+                            currentPageNotifier: _pageViewNotifier,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
+              ],
+            ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.grey[800],
+        selectedItemColor: Colors.orange,
+        unselectedItemColor: Colors.white,
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+            _pageController.animateToPage(
+              index,
+              duration: Duration(milliseconds: 500),
+              curve: Curves.easeInOut,
+            );
+          });
+        },
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.attach_money),
+            label: 'Loan',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.security),
+            label: 'Vault',
+          ),
+        ],
       ),
     );
+  }
+
+  Future<void> blockchainInit(bool isElectrumBlockchain) async {
+    blockchain = await bdk.initializeBlockchain(isElectrumBlockchain);
+  }
+
+  Widget _buildTransactionCard(
+      ExpandableTransaction expandableTransaction, int price) {
+    final TransactionDetails transaction = expandableTransaction.transaction;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          expandableTransaction.isExpanded = !expandableTransaction.isExpanded;
+        });
+      },
+      child: Card(
+        color: Colors.grey[900],
+        elevation: 3,
+        margin: EdgeInsets.symmetric(vertical: 8),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Value: ${transaction.received - transaction.sent} sats (\$ ${(((transaction.received - transaction.sent) / 100000000) * price).toStringAsFixed(2)})",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(height: 4),
+              if (expandableTransaction
+                  .isExpanded) // Show details only if expanded
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'TXID: ${transaction.txid}',
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Timestamp: ${transaction.confirmationTime?.timestamp ?? "Pending"}',
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Fee: ${transaction.fee}',
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showPageIndicators() {
+    setState(() {
+      _expanded = true;
+    });
+
+    // Cancel the existing timer
+    _timer?.cancel();
+
+    // Set a new timer to hide the indicators after 1 second
+    _timer = Timer(Duration(seconds: 1), () {
+      setState(() {
+        _expanded = false;
+      });
+    });
   }
 }
