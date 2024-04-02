@@ -75,9 +75,10 @@ class WelcomeState extends State<Welcome> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
+            Text(
               'Welcome to Nord!',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              // style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.displayLarge,
             ),
             const SizedBox(
                 height: 30), // Add space between text and first button

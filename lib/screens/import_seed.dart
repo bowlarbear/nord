@@ -35,9 +35,9 @@ class ImportSeedState extends State<ImportSeed> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            const Text(
+            Text(
               'Seed',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.displayMedium,
             ),
             TextField(
               decoration: const InputDecoration(

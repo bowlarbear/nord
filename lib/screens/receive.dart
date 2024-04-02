@@ -54,7 +54,6 @@ class ReceiveState extends State<Receive> {
           },
         ),
       ),
-      backgroundColor: Colors.black,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(20.0),

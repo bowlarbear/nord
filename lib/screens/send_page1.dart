@@ -174,7 +174,6 @@ class SendingState extends State<Sending> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.black,
           contentPadding: const EdgeInsets.all(20),
           content: SizedBox(
             width: 300,

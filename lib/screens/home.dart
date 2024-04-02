@@ -214,7 +214,6 @@ class _HomeState extends State<Home> {
       onTap: _handleUserTap,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
-        backgroundColor: Colors.white,
         appBar: AppBar(
           title: const Text('Home'),
         ),

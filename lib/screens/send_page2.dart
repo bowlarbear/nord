@@ -56,7 +56,6 @@ class SendingScreenState extends State<SendingScreen> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text('Sending Screen'),
-        backgroundColor: Colors.black, // Black app bar
         iconTheme:
             const IconThemeData(color: Colors.grey), // Bright gray back arrow
       ),
