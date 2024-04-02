@@ -385,6 +385,9 @@ class _HomeState extends State<Home> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor,
+                      ),
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -393,9 +396,15 @@ class _HomeState extends State<Home> {
                           ),
                         );
                       },
-                      child: const Text('Receive'),
+                      child: const Text(
+                        'Receive',
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
                     ),
                     ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor,
+                      ),
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -407,7 +416,10 @@ class _HomeState extends State<Home> {
                           ),
                         );
                       },
-                      child: const Text('Send'),
+                      child: const Text(
+                        'Send',
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
                     ),
                   ],
                 ),

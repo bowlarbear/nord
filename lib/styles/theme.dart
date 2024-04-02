@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 ThemeData theme() {
-  Color secondaryColor = Colors.orange;
-  Color primaryColor = Colors.blue.withOpacity(.8);
+  Color secondaryColor = Colors.orange.withOpacity(.8);
+  Color primaryColor = Colors.orange.withOpacity(.8);
   Color globalBackgroundColor = Colors.black;
   return ThemeData(
       primaryColor: primaryColor,

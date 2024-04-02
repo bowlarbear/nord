@@ -119,7 +119,7 @@ class ReceiveState extends State<Receive> {
               ElevatedButton(
                 onPressed: _getNewAddress,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: Theme.of(context).primaryColor,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                   shape: RoundedRectangleBorder(
@@ -128,7 +128,7 @@ class ReceiveState extends State<Receive> {
                 ),
                 child: const Text(
                   'Generate New Address',
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
               const SizedBox(height: 50),

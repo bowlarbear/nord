@@ -53,16 +53,25 @@ class ImportSeedState extends State<ImportSeed> {
             Row(
               children: <Widget>[
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor,
+                  ),
                   onPressed: () {
                     writeSeedToFile(seed);
                     print('Proceed button pressed');
                     Navigator.pushReplacement(context,
                         MaterialPageRoute(builder: (context) => const Home()));
                   },
-                  child: const Text('Proceed'),
+                  child: const Text(
+                    'Proceed',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
                 ),
                 const SizedBox(width: 10), // Space between buttons
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor,
+                  ),
                   onPressed: () {
                     Navigator.pushReplacement(
                         context,
@@ -70,7 +79,10 @@ class ImportSeedState extends State<ImportSeed> {
                             builder: (context) => const Welcome()));
                     print('Back button pressed');
                   },
-                  child: const Text('Back'),
+                  child: const Text(
+                    'Back',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
                 ),
               ],
             ),
