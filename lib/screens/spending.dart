@@ -330,12 +330,7 @@ class _SpendingState extends State<Spending> with TickerProviderStateMixin {
                                         fontSize: 24,
                                       ),
                                     ),
-                                    Container(
-                                      margin: const EdgeInsets.symmetric(
-                                          vertical: 10),
-                                      height: 1,
-                                      color: Colors.white,
-                                    ),
+                                    const SizedBox(height: 10),
                                     Row(
                                       children: [
                                         Expanded(
@@ -408,10 +403,7 @@ class _SpendingState extends State<Spending> with TickerProviderStateMixin {
                                         ),
                                       ],
                                     ),
-                                    const Divider(
-                                      color: Colors.white,
-                                      thickness: 1,
-                                    ),
+                                    const SizedBox(height: 10),
                                     Expanded(
                                       child: ListView.builder(
                                         itemCount: transactions.length,

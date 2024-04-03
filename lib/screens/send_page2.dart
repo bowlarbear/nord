@@ -29,6 +29,7 @@ class SendingState extends State<Sending> {
   final TextEditingController _noteController = TextEditingController();
   bool _canSend = false;
   bool _isSuccessDisplayed = false;
+  bool _isSending = false;
 
   @override
   void initState() {
@@ -116,37 +117,40 @@ class SendingState extends State<Sending> {
                 style: const TextStyle(color: Colors.white),
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _canSend ? _sendTransaction : null,
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                    (states) {
-                      if (states.contains(MaterialState.disabled)) {
-                        return Colors.grey; // Gray when disabled
-                      }
-                      return Colors.orange; // Bright orange when enabled
-                    },
-                  ),
-                  padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                    const EdgeInsets.symmetric(
-                      vertical: 12,
-                      horizontal: 16,
+              _isSending
+                  ? const Center(child: CircularProgressIndicator())
+                  : ElevatedButton(
+                      onPressed: _canSend ? _sendTransaction : null,
+                      style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.resolveWith<Color>(
+                          (states) {
+                            if (states.contains(MaterialState.disabled)) {
+                              return Colors.grey; // Gray when disabled
+                            }
+                            return Colors.orange; // Bright orange when enabled
+                          },
+                        ),
+                        padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                          const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 16,
+                          ),
+                        ),
+                        shape: MaterialStateProperty.all<OutlinedBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                      child: const Text(
+                        'Send',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                  ),
-                  shape: MaterialStateProperty.all<OutlinedBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                child: const Text(
-                  'Send',
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -202,6 +206,9 @@ class SendingState extends State<Sending> {
   }
 
   void _sendTransaction() async {
+    setState(() {
+      _isSending = true;
+    });
     String recipientAddress = _recipientAddressController.text;
     // String note = _noteController.text;
     double amount = widget.amount;
