@@ -235,6 +235,9 @@ class SendingState extends State<Sending> {
       _showSuccessAnimation(context);
       _recipientAddressController.clear();
       _noteController.clear();
+      setState(() {
+        _isSending = false;
+      });
     } catch (e, stackTrace) {
       // Error handling
       print('Error sending Bitcoin: $e');
@@ -246,6 +249,9 @@ class SendingState extends State<Sending> {
           backgroundColor: Colors.red,
         ),
       );
+      setState(() {
+        _isSending = false;
+      });
     }
   }
 
