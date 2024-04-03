@@ -14,6 +14,7 @@ ThemeData theme() {
           fontSize: 20.0, // Optional: Adjust the font size
           fontWeight: FontWeight.bold, // Optional: Adjust the font weight
         ),
+        iconTheme: IconThemeData(color: Colors.white),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.black,

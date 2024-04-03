@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'home.dart';
+import 'spending.dart';
 import 'welcome.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
@@ -124,7 +124,7 @@ class ImportSeedState extends State<ImportSeed> {
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const Home()));
+                                  builder: (context) => const Spending()));
                         }
                       : null,
                   child: const Text(

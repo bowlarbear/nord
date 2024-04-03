@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bdk_flutter/bdk_flutter.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'home.dart'; // Assuming your home screen file is named home.dart
+import 'spending.dart';
 
 class Sending extends StatefulWidget {
   final Wallet wallet;
@@ -303,7 +303,7 @@ class SendingState extends State<Sending> {
     Future.delayed(const Duration(seconds: 1), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const Home()),
+        MaterialPageRoute(builder: (context) => const Spending()),
       );
     });
   }
