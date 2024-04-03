@@ -4,7 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'receive.dart';
 import '../bdk_lib.dart';
-import 'send_page2.dart';
+import 'send_page1.dart';
 import 'dart:async';
 import 'settings.dart';
 import 'savings.dart';
@@ -379,11 +379,10 @@ class _SpendingState extends State<Spending> with TickerProviderStateMixin {
                                                 MaterialPageRoute(
                                                   builder: (context) =>
                                                       SendingScreen(
-                                                          wallet: this.wallet,
+                                                          wallet: wallet,
                                                           blockchain:
-                                                              this.blockchain,
-                                                          balance:
-                                                              this.balance),
+                                                              blockchain,
+                                                          balance: balance),
                                                 ),
                                               );
                                             },

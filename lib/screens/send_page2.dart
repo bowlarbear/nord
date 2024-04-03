@@ -1,332 +1,308 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:bdk_flutter/bdk_flutter.dart';
-import 'send_page1.dart';
+import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'spending.dart';
 
-class SendingScreen extends StatefulWidget {
+class Sending extends StatefulWidget {
   final Wallet wallet;
   final int? balance;
+  final double amount;
   final Blockchain? blockchain;
 
-  const SendingScreen(
-      {Key? key, required this.wallet, this.balance, this.blockchain})
-      : super(key: key);
+  const Sending({
+    super.key,
+    required this.wallet,
+    this.balance,
+    required this.amount,
+    required this.blockchain,
+  });
 
   @override
-  SendingScreenState createState() => SendingScreenState();
+  SendingState createState() => SendingState();
 }
 
-class SendingScreenState extends State<SendingScreen> {
-  late FocusNode _focusNode;
-  late double enteredAmount;
-  late double maxAmountToSpend;
-  final NumberFormat satoshiFormat = NumberFormat('#,### sats');
-  bool isAmountIncreased = false;
-  final TextEditingController _controller = TextEditingController();
+class SendingState extends State<Sending> {
+  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  late QRViewController controller;
+  final TextEditingController _recipientAddressController =
+      TextEditingController();
+  final TextEditingController _noteController = TextEditingController();
+  bool _canSend = false;
+  bool _isSuccessDisplayed = false;
 
   @override
   void initState() {
     super.initState();
-    _focusNode = FocusNode();
-    enteredAmount = 0.0;
-    maxAmountToSpend = widget.balance?.toDouble() ?? 0.0;
-    _focusNode.addListener(handleFocusChange);
-    _focusNode.requestFocus();
-  }
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void handleFocusChange() {
-    if (!_focusNode.hasFocus) {
-      double newValue = double.tryParse(_controller.text) ?? 0.0;
-      if (newValue <= maxAmountToSpend) {
-        setState(() => enteredAmount = newValue);
-      }
-    }
+    _recipientAddressController.addListener(_checkCanSend);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text('Sending Screen'),
+        elevation: 0,
+        title: const Text(
+          'Sending Details',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
-      body: Stack(
-        children: [
-          Container(
-            color: Colors.black,
-            padding: const EdgeInsets.fromLTRB(16.0, 48.0, 16.0, 16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 16),
-                AmountSection(
-                  enteredAmount: enteredAmount,
-                  onAmountChanged: handleTextFieldChange,
-                  maxAmountToSpend: maxAmountToSpend,
-                  satoshiFormat: satoshiFormat,
-                  onTap: () {
-                    _focusNode.requestFocus();
-                  },
-                ),
-                const SizedBox(height: 16),
-                SliderSection(
-                  enteredAmount: enteredAmount,
-                  maxAmountToSpend: maxAmountToSpend,
-                  onSliderChanged: onSliderChanged,
-                ),
-                const SizedBox(
-                    height: 24), // Add space between slider and button
-                ElevatedButton(
-                  onPressed: isAmountIncreased
-                      ? () {
-                          // Navigate to the Sending.dart page with necessary parameters
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => Sending(
-                                  wallet: widget.wallet,
-                                  balance: widget.balance,
-                                  amount: enteredAmount,
-                                  blockchain: widget.blockchain),
-                            ),
-                          );
-                        }
-                      : null,
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(
-                        isAmountIncreased ? Colors.orange : Colors.grey),
-                    minimumSize: MaterialStateProperty.all<Size>(
-                        const Size(double.infinity, 50)),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  _startQRScanner();
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color.fromARGB(255, 0, 0, 131),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
                   ),
-                  child: const Text(
-                    'Next',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20), // White text, bigger font size
-                  ),
-                ),
-                const SizedBox(height: 16), // Adjust the height as needed
-                InvisibleTextField(
-                  controller: _controller,
-                  focusNode: _focusNode,
-                  onChanged: handleTextFieldChange,
-                  onSubmitted: (_) => printEnteredAmount(),
-                ),
-              ],
-            ),
-          ),
-          if (widget.balance == 0)
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                color: Colors.red,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: const Center(
-                  child: Text(
-                    'You have no funds.',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white,
-                    ),
+                  child: const Icon(
+                    Icons.qr_code,
+                    size: 100,
+                    color: Colors.white,
                   ),
                 ),
               ),
-            ),
-        ],
+              const SizedBox(height: 20),
+              TextField(
+                controller: _recipientAddressController,
+                decoration: InputDecoration(
+                  hintText: 'Enter recipient address',
+                  hintStyle: TextStyle(color: Colors.grey[400]),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue[800]!),
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue[800]!),
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[900],
+                ),
+                style: const TextStyle(color: Colors.white),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _noteController,
+                decoration: InputDecoration(
+                  hintText: 'Add a note (optional)',
+                  hintStyle: TextStyle(color: Colors.grey[400]),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue[800]!),
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue[800]!),
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[900],
+                ),
+                style: const TextStyle(color: Colors.white),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _canSend ? _sendTransaction : null,
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                    (states) {
+                      if (states.contains(MaterialState.disabled)) {
+                        return Colors.grey; // Gray when disabled
+                      }
+                      return Colors.orange; // Bright orange when enabled
+                    },
+                  ),
+                  padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                    const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 16,
+                    ),
+                  ),
+                  shape: MaterialStateProperty.all<OutlinedBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                child: const Text(
+                  'Send',
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  void onSliderChanged(double value) {
-    setState(() {
-      enteredAmount = value;
-      isAmountIncreased = true; // Set to true when slider changes
-    });
-  }
-
-  void handleTextFieldChange(String value) {
-    if (value.isEmpty) {
-      setState(() => enteredAmount = 0.0);
-    } else {
-      double newValue = double.tryParse(value) ?? 0.0;
-      if (newValue > maxAmountToSpend) {
-        showExceedBalanceWarning();
-      } else {
-        setState(() {
-          enteredAmount = newValue;
-          isAmountIncreased = true; // Set to true when text field changes
-        });
-      }
-    }
-  }
-
-  void printEnteredAmount() {
-    print('Entered amount: $enteredAmount');
-  }
-
-  void showExceedBalanceWarning() {
+  void _startQRScanner() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Warning"),
-          content: const Text(
-            "You have exceeded your balance.",
-            style: TextStyle(
-              color: Colors.red,
+          contentPadding: const EdgeInsets.all(20),
+          content: SizedBox(
+            width: 300,
+            height: 300,
+            child: QRView(
+              key: qrKey,
+              onQRViewCreated: _onQRViewCreated,
             ),
           ),
-          actions: [
+          actions: <Widget>[
             TextButton(
-              child: const Text("OK"),
               onPressed: () {
-                Navigator.pop(context);
+                _stopQRScanner();
               },
+              child: const Text(
+                'Close',
+                style: TextStyle(color: Colors.black),
+              ),
             ),
           ],
         );
       },
     );
   }
-}
 
-class AmountSection extends StatelessWidget {
-  final double enteredAmount;
-  final ValueChanged<String> onAmountChanged;
-  final double maxAmountToSpend;
-  final NumberFormat satoshiFormat;
-  final VoidCallback onTap;
-
-  const AmountSection({
-    super.key,
-    required this.enteredAmount,
-    required this.onAmountChanged,
-    required this.maxAmountToSpend,
-    required this.satoshiFormat,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Text(
-              satoshiFormat.format(enteredAmount),
-              style: const TextStyle(fontSize: 24, color: Colors.white),
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Center(
-            child: Text(
-              'Tap the amount to edit',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            height: 48.0,
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Colors.white, width: 1.0),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+  void _onQRViewCreated(QRViewController controller) {
+    this.controller = controller;
+    controller.scannedDataStream.listen((scanData) async {
+      print('Scanned Data: ${scanData.code}');
+      _recipientAddressController.text = scanData.code ?? '';
+      _canSend = true;
+      await controller.stopCamera(); // Stop the camera
+      Navigator.of(context).pop(); // Close the QR code scanner dialog
+    });
   }
-}
 
-class SliderSection extends StatelessWidget {
-  final double enteredAmount;
-  final double maxAmountToSpend;
-  final ValueChanged<double> onSliderChanged;
-
-  const SliderSection({
-    super.key,
-    required this.enteredAmount,
-    required this.maxAmountToSpend,
-    required this.onSliderChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Slider(
-          value: enteredAmount,
-          min: 0.0,
-          max: maxAmountToSpend,
-          onChanged: onSliderChanged,
-          label: '\$${enteredAmount.toStringAsFixed(2)}',
-          activeColor: Colors.blue,
-          inactiveColor: Colors.grey,
-        ),
-        const SizedBox(height: 16),
-        const Text(
-          'Slide to increase amount',
-          style: TextStyle(fontSize: 16, color: Colors.grey),
-        ),
-      ],
-    );
+  void _checkCanSend() {
+    setState(() {
+      _canSend = _recipientAddressController.text.isNotEmpty;
+    });
   }
-}
 
-class InvisibleTextField extends StatelessWidget {
-  final TextEditingController controller;
-  final FocusNode focusNode;
-  final ValueChanged<String> onChanged;
-  final ValueChanged<String>? onSubmitted;
+  void _sendTransaction() async {
+    String recipientAddress = _recipientAddressController.text;
+    // String note = _noteController.text;
+    double amount = widget.amount;
 
-  const InvisibleTextField({
-    super.key,
-    required this.controller,
-    required this.focusNode,
-    required this.onChanged,
-    this.onSubmitted,
-  });
+    // Convert the double amount to an integer
+    int amountInSatoshis = amount.toInt(); // Convert to int
+
+    try {
+      final txBuilder = TxBuilder();
+      final address = await Address.create(address: recipientAddress);
+      final script = await address.scriptPubKey();
+      final feeRate = await widget.blockchain!.estimateFee(25);
+      final txBuilderResult = await txBuilder
+          .addRecipient(script, amountInSatoshis) // Pass the integer value
+          .feeRate(feeRate.asSatPerVb())
+          .finish(widget.wallet);
+      final sbt = await widget.wallet.sign(psbt: txBuilderResult.psbt);
+      final tx = await sbt.extractTx();
+
+      // Broadcasting transaction
+      await widget.blockchain!.broadcast(tx);
+
+      // Success message to user
+      _showSuccessAnimation(context);
+      _recipientAddressController.clear();
+      _noteController.clear();
+    } catch (e, stackTrace) {
+      // Error handling
+      print('Error sending Bitcoin: $e');
+      print('Stack trace: $stackTrace');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to send Bitcoin: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _showSuccessAnimation(BuildContext context) {
+    if (_isSuccessDisplayed) return;
+    _isSuccessDisplayed = true;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Center(
+          child: Material(
+            color: Colors.transparent,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(seconds: 1),
+                  width: 100,
+                  height: 100,
+                  decoration: const BoxDecoration(
+                    color: Colors.black54,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check,
+                    color: Colors.green,
+                    size: 60,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Success!',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    Future.delayed(const Duration(seconds: 1), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const Spending()),
+      );
+    });
+  }
+
+  void _stopQRScanner() {
+    Navigator.pop(context);
+    controller.dispose();
+  }
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.transparent,
-      child: TextField(
-        controller: controller,
-        focusNode: focusNode,
-        style: const TextStyle(color: Colors.transparent),
-        cursorColor: Colors.transparent,
-        keyboardType: const TextInputType.numberWithOptions(
-            decimal:
-                true), // Set keyboardType to TextInputType.numberWithOptions(decimal: true)
-        onChanged: onChanged,
-        onSubmitted: onSubmitted,
-        decoration: const InputDecoration(
-          border: InputBorder.none,
-          focusedBorder: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          errorBorder: InputBorder.none,
-          disabledBorder: InputBorder.none,
-        ),
-      ),
-    );
+  void dispose() {
+    _recipientAddressController.dispose();
+    _noteController.dispose();
+    _stopQRScanner();
+    super.dispose();
   }
 }
