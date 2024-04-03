@@ -420,13 +420,6 @@ class _SpendingState extends State<Spending> with TickerProviderStateMixin {
                             ],
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 20.0),
-                          child: AnimatedOpacity(
-                            opacity: _expanded ? 1.0 : 0.0,
-                            duration: const Duration(milliseconds: 500),
-                          ),
-                        ),
                       ],
                     ),
                   ),
