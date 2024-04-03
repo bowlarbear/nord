@@ -13,6 +13,7 @@ class Welcome extends StatefulWidget {
 }
 
 class WelcomeState extends State<Welcome> {
+  bool isLoading = true;
   @override
   void initState() {
     super.initState();
@@ -32,6 +33,9 @@ class WelcomeState extends State<Welcome> {
       } else {
         print('Seed file does not exist.');
         // Seed file does not exist, create new seed or import?
+        setState(() {
+          isLoading = false;
+        });
       }
     } catch (e) {
       print('Error checking seed file: $e');
@@ -68,60 +72,64 @@ class WelcomeState extends State<Welcome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'Welcome to Nord!',
-              // style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              style: Theme.of(context).textTheme.displayLarge,
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    'Welcome to Nord!',
+                    // style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.displayLarge,
+                  ),
+                  const SizedBox(
+                      height: 30), // Add space between text and first button
+                  ElevatedButton(
+                    onPressed: () {
+                      print('New User button pressed');
+                      generateSeed();
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const Spending()));
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      minimumSize: const Size(
+                          double.infinity, 50), // Set button width and height
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 15), // Add padding
+                    ),
+                    child: const Text(
+                      'New User',
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(height: 20), // Add space between buttons
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const ImportSeed()));
+                      print('Import button pressed');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      minimumSize: const Size(
+                          double.infinity, 50), // Set button width and height
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 15), // Add padding
+                    ),
+                    child: const Text(
+                      'Import',
+                      style: TextStyle(fontSize: 16, color: Colors.black),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(
-                height: 30), // Add space between text and first button
-            ElevatedButton(
-              onPressed: () {
-                print('New User button pressed');
-                generateSeed();
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (context) => const Spending()));
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
-                minimumSize: const Size(
-                    double.infinity, 50), // Set button width and height
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 15), // Add padding
-              ),
-              child: const Text(
-                'New User',
-                style: TextStyle(fontSize: 16, color: Colors.white),
-              ),
-            ),
-            const SizedBox(height: 20), // Add space between buttons
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const ImportSeed()));
-                print('Import button pressed');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                minimumSize: const Size(
-                    double.infinity, 50), // Set button width and height
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 15), // Add padding
-              ),
-              child: const Text(
-                'Import',
-                style: TextStyle(fontSize: 16, color: Colors.black),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

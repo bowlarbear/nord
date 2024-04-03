@@ -28,7 +28,6 @@ class SendingState extends State<Sending> {
       TextEditingController();
   final TextEditingController _noteController = TextEditingController();
   bool _canSend = false;
-  bool _isScanning = false;
   bool _isSuccessDisplayed = false;
 
   @override
@@ -40,9 +39,7 @@ class SendingState extends State<Sending> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.black,
         elevation: 0,
         title: const Text(
           'Sending Details',
@@ -57,7 +54,7 @@ class SendingState extends State<Sending> {
             children: [
               GestureDetector(
                 onTap: () {
-                  _toggleQRScanner();
+                  _startQRScanner();
                 },
                 child: Container(
                   padding: const EdgeInsets.all(20),
@@ -157,18 +154,6 @@ class SendingState extends State<Sending> {
     );
   }
 
-  void _toggleQRScanner() {
-    setState(() {
-      _isScanning = !_isScanning;
-    });
-
-    if (_isScanning) {
-      _startQRScanner();
-    } else {
-      _stopQRScanner();
-    }
-  }
-
   void _startQRScanner() {
     showDialog(
       context: context,
@@ -186,11 +171,11 @@ class SendingState extends State<Sending> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                _toggleQRScanner();
+                _stopQRScanner();
               },
               child: const Text(
                 'Close',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: Colors.black),
               ),
             ),
           ],
@@ -309,6 +294,7 @@ class SendingState extends State<Sending> {
   }
 
   void _stopQRScanner() {
+    Navigator.pop(context);
     controller.dispose();
   }
 
