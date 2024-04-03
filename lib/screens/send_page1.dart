@@ -240,14 +240,6 @@ class AmountSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Container(
-            height: 48.0,
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Colors.white, width: 1.0),
-              ),
-            ),
-          ),
         ],
       ),
     );
