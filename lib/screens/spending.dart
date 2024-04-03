@@ -8,6 +8,7 @@ import 'send_page1.dart';
 import 'dart:async';
 import 'settings.dart';
 import 'savings.dart';
+import 'package:intl/intl.dart';
 
 class ExpandableTransaction {
   final TransactionDetails transaction;
@@ -40,7 +41,6 @@ class _SpendingState extends State<Spending> with TickerProviderStateMixin {
   late AnimationController _controller;
   int _currentIndex = 0;
   late PageController _pageController;
-  final bool _expanded = false;
   final _pageViewNotifier = ValueNotifier<int>(0);
   Timer? _timer;
 
@@ -199,6 +199,16 @@ class _SpendingState extends State<Spending> with TickerProviderStateMixin {
     blockchain = await bdk.initializeBlockchain(isElectrumBlockchain);
   }
 
+  String formatTimestamp(int? timestamp) {
+    if (timestamp == null) {
+      return "Pending";
+    } else {
+      var date = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+      var formattedDate = DateFormat('MM/dd/yyyy').format(date);
+      return formattedDate;
+    }
+  }
+
   Widget _buildTransactionCard(
       ExpandableTransaction expandableTransaction, int price) {
     final TransactionDetails transaction = expandableTransaction.transaction;
@@ -212,14 +222,14 @@ class _SpendingState extends State<Spending> with TickerProviderStateMixin {
       child: Card(
         color: Colors.grey[900],
         elevation: 3,
-        margin: EdgeInsets.symmetric(vertical: 8),
+        margin: const EdgeInsets.symmetric(vertical: 8),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Value: ${transaction.received - transaction.sent} sats (\$ ${(((transaction.received - transaction.sent) / 100000000) * price).toStringAsFixed(2)})",
+                "${formatTimestamp(transaction.confirmationTime?.timestamp)} ${transaction.received - transaction.sent} sats (\$ ${(((transaction.received - transaction.sent) / 100000000) * price).toStringAsFixed(2)})",
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
