@@ -33,7 +33,6 @@ class _SpendingState extends State<Spending> with TickerProviderStateMixin {
   Blockchain? blockchain;
   String mnemonic = '';
   String? displayText;
-  // List<TransactionDetails> transactions = [];
   List<ExpandableTransaction> transactions = [];
   int balance = 0;
   bool _isLoading = false;
@@ -228,12 +227,27 @@ class _SpendingState extends State<Spending> with TickerProviderStateMixin {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "${formatTimestamp(transaction.confirmationTime?.timestamp)} ${transaction.received - transaction.sent} sats (\$ ${(((transaction.received - transaction.sent) / 100000000) * price).toStringAsFixed(2)})",
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+              RichText(
+                text: TextSpan(children: [
+                  TextSpan(
+                    text: formatTimestamp(
+                        transaction.confirmationTime?.timestamp),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  TextSpan(
+                    text:
+                        "  ${transaction.received - transaction.sent} sats  (\$ ${(((transaction.received - transaction.sent) / 100000000) * price).toStringAsFixed(2)} )",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: (transaction.received - transaction.sent) < 0
+                          ? Colors.red
+                          : Colors.green,
+                    ),
+                  ),
+                ]),
               ),
               const SizedBox(height: 4),
               if (expandableTransaction
