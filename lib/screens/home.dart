@@ -207,108 +207,6 @@ class _HomeState extends State<Home> {
     blockchain = await bdk.initializeBlockchain(isElectrumBlockchain);
   }
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return GestureDetector(
-//       behavior: HitTestBehavior.opaque,
-//       onTap: _handleUserTap,
-//       child: Scaffold(
-//         resizeToAvoidBottomInset: true,
-//         appBar: AppBar(
-//           title: const Text('Home'),
-//         ),
-//         body: RefreshIndicator(
-//           onRefresh: handleRefresh,
-//           child: _isLoading
-//               ? const Center(child: CircularProgressIndicator())
-//               : SingleChildScrollView(
-//                   physics: const AlwaysScrollableScrollPhysics(),
-//                   child: Container(
-//                     padding: const EdgeInsets.symmetric(horizontal: 30),
-//                     child: Column(
-//                       children: [
-//                         BalanceContainer(
-//                           text:
-//                               "$balance Sats (\$ ${((balance / 100000000) * price).toStringAsFixed(2)})",
-//                         ),
-//                         transactions.isEmpty
-//                             ? const Center(
-//                                 //conditionally display this string when tx history is empty
-//                                 child: Text("No transaction history"),
-//                               )
-//                             : Column(
-//                                 //display transactions in descending order
-//                                 children: transactions
-//                                     .map(
-//                                       (transaction) => Card(
-//                                         child: Padding(
-//                                           padding: const EdgeInsets.all(8.0),
-//                                           child: Column(
-//                                             crossAxisAlignment:
-//                                                 CrossAxisAlignment.start,
-//                                             children: [
-//                                               Text(
-//                                                 "Value: ${transaction.received - transaction.sent} sats (\$ ${(((transaction.received - transaction.sent) / 100000000) * price).toStringAsFixed(2)})",
-//                                                 style: const TextStyle(
-//                                                   fontWeight: FontWeight.bold,
-//                                                 ),
-//                                               ),
-//                                               Text('TXID: ${transaction.txid}'),
-//                                               Text(
-//                                                 'Timestamp: ${transaction.confirmationTime?.timestamp ?? "Pending"}',
-//                                               ),
-//                                               Text('Fee: ${transaction.fee}'),
-//                                             ],
-//                                           ),
-//                                         ),
-//                                       ),
-//                                     )
-//                                     .toList(),
-//                               ),
-//                         StyledContainer(
-//                           child: Row(
-//                             mainAxisAlignment: MainAxisAlignment.start,
-//                             crossAxisAlignment: CrossAxisAlignment.center,
-//                             children: [
-//                               ElevatedButton(
-//                                 onPressed: () {
-//                                   Navigator.push(
-//                                     context,
-//                                     MaterialPageRoute(
-//                                       builder: (context) =>
-//                                           Receive(wallet: wallet),
-//                                     ),
-//                                   );
-//                                 },
-//                                 child: const Text('Receive'),
-//                               ),
-//                               ElevatedButton(
-//                                 onPressed: () {
-//                                   Navigator.push(
-//                                     context,
-//                                     MaterialPageRoute(
-//                                       builder: (context) => SendingScreen(
-//                                           wallet: wallet,
-//                                           blockchain: blockchain,
-//                                           balance: balance),
-//                                     ),
-//                                   );
-//                                 },
-//                                 child: const Text('send'),
-//                               ),
-//                             ],
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                 ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -317,7 +215,7 @@ class _HomeState extends State<Home> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: const Text('Home'),
+          title: const Text('Spending Wallet'),
         ),
         body: Stack(
           children: [
