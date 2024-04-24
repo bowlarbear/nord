@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'receive.dart';
-import '../bdk_lib.dart';
+import '../../bdk_lib.dart';
 import 'send_page1.dart';
 import 'dart:async';
-import 'settings.dart';
-import 'savings.dart';
+import '../settings.dart';
+import '../savings/savings_dashboard.dart';
 import 'package:intl/intl.dart';
 
 class ExpandableTransaction {

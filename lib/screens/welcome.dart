@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'spending/spending_dashboard.dart';
-import 'import_seed.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:bdk_flutter/bdk_flutter.dart';

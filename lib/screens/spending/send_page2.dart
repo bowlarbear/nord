@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bdk_flutter/bdk_flutter.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'spending.dart';
+import 'spending_dashboard.dart';
 
 class Sending extends StatefulWidget {
   final Wallet wallet;

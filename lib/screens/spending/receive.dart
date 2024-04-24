@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:barcode_widget/barcode_widget.dart';
-import '../bdk_lib.dart';
+import '../../bdk_lib.dart';
 import 'package:bdk_flutter/bdk_flutter.dart';
 import 'package:flutter/services.dart'; // Import for ClipboardData and Clipboard
 

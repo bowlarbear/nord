@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'spending.dart';
+import 'spending/spending_dashboard.dart';
 import 'welcome.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
