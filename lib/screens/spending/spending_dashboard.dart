@@ -440,7 +440,7 @@ class _SpendingState extends State<Spending> with TickerProviderStateMixin {
                                   ],
                                 ),
                               ),
-                              SavingsPage(),
+                              Saving(),
                             ],
                           ),
                         ),
