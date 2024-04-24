@@ -3,6 +3,7 @@ import 'package:bdk_flutter/bdk_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'welcome.dart';
+import 'import_seed.dart';
 
 class Settings extends StatelessWidget {
   final Wallet wallet;
@@ -49,6 +50,23 @@ class Settings extends StatelessWidget {
                 ),
               ),
               child: const Text('Delete Seed',
+                  style: TextStyle(color: Colors.white)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ImportSeed()));
+                ;
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+              child: const Text('Import Seed',
                   style: TextStyle(color: Colors.white)),
             ),
           ],

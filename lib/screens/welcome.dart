@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'spending.dart';
+import 'spending/spending_dashboard.dart';
 import 'import_seed.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
@@ -25,17 +25,20 @@ class WelcomeState extends State<Welcome> {
       final directory = await getApplicationDocumentsDirectory();
       final seedFilePath = '${directory.path}/seed';
       final seedFile = File(seedFilePath);
-
       if (await seedFile.exists()) {
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (context) => const Spending()));
         // Seed file exists, send user home
       } else {
         print('Seed file does not exist.');
-        // Seed file does not exist, create new seed or import?
+        // Seed file does not exist, create new seed
+        await generateSeed();
         setState(() {
           isLoading = false;
         });
+        //send user to spending wallet
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => const Spending()));
       }
     } catch (e) {
       print('Error checking seed file: $e');
@@ -85,48 +88,6 @@ class WelcomeState extends State<Welcome> {
                   ),
                   const SizedBox(
                       height: 30), // Add space between text and first button
-                  ElevatedButton(
-                    onPressed: () {
-                      print('New User button pressed');
-                      generateSeed();
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const Spending()));
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      minimumSize: const Size(
-                          double.infinity, 50), // Set button width and height
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 15), // Add padding
-                    ),
-                    child: const Text(
-                      'New User',
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                  ),
-                  const SizedBox(height: 20), // Add space between buttons
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const ImportSeed()));
-                      print('Import button pressed');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      minimumSize: const Size(
-                          double.infinity, 50), // Set button width and height
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 15), // Add padding
-                    ),
-                    child: const Text(
-                      'Import',
-                      style: TextStyle(fontSize: 16, color: Colors.black),
-                    ),
-                  ),
                 ],
               ),
             ),
