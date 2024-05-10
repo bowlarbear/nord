@@ -3,6 +3,7 @@ import 'spending/spending_dashboard.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:bdk_flutter/bdk_flutter.dart';
+import 'import_seed.dart';
 
 class Welcome extends StatefulWidget {
   const Welcome({super.key});
@@ -31,13 +32,13 @@ class WelcomeState extends State<Welcome> {
       } else {
         print('Seed file does not exist.');
         // Seed file does not exist, create new seed
-        await generateSeed();
+        // await generateSeed();
         setState(() {
           isLoading = false;
         });
         //send user to spending wallet
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => const Spending()));
+        // Navigator.pushReplacement(
+        //     context, MaterialPageRoute(builder: (context) => const Spending()));
       }
     } catch (e) {
       print('Error checking seed file: $e');
@@ -71,6 +72,11 @@ class WelcomeState extends State<Welcome> {
     checkForSeed();
   }
 
+  void importSeed() {
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => const ImportSeed()));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,6 +93,7 @@ class WelcomeState extends State<Welcome> {
                   ),
                   const SizedBox(
                       height: 30), // Add space between text and first button
+                  ElevatedButton(onPressed: importSeed, child:  const Text('Import Seed')
                 ],
               ),
             ),
