@@ -93,7 +93,8 @@ class WelcomeState extends State<Welcome> {
                   ),
                   const SizedBox(
                       height: 30), // Add space between text and first button
-                  ElevatedButton(onPressed: importSeed, child:  const Text('Import Seed')
+                  ElevatedButton(
+                      onPressed: importSeed, child: const Text('Import Seed')),
                 ],
               ),
             ),
