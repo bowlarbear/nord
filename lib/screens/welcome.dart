@@ -13,7 +13,7 @@ class Welcome extends StatefulWidget {
 }
 
 class WelcomeState extends State<Welcome> {
-  bool isLoading = true;
+  bool isLoading = false;
   @override
   void initState() {
     super.initState();
@@ -69,12 +69,17 @@ class WelcomeState extends State<Welcome> {
   void onPageLoad() async {
     print('Welcome Page loaded');
     print('Checking for seed...');
-    checkForSeed();
+    // checkForSeed();
   }
 
   void importSeed() {
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (context) => const ImportSeed()));
+  }
+
+  void navigateDashboard() {
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => const Spending()));
   }
 
   @override
@@ -95,6 +100,11 @@ class WelcomeState extends State<Welcome> {
                       height: 30), // Add space between text and first button
                   ElevatedButton(
                       onPressed: importSeed, child: const Text('Import Seed')),
+                  const SizedBox(
+                      height: 30), // Add space between text and first button
+                  ElevatedButton(
+                      onPressed: navigateDashboard,
+                      child: const Text('Dashboard')),
                 ],
               ),
             ),
